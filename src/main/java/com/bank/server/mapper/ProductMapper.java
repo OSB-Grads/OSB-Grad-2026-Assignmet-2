@@ -7,34 +7,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Mapper(componentModel = "spring")
-public class ProductMapper {
+public interface ProductMapper {
 
-//        ProductDTO toDTO(Product product);
-//
-//        Product toEntity (ProductDTO productDTO);
+        ProductDTO toDTO(Product product);
 
-    public ProductDTO toDTO(Product product)
-    {
-        return ProductDTO.builder()
-                .id(product.getId())
-                .productName(product.getProductName())
-                .category(product.getCategory())
-                .interestRate(product.getInterestRate())
-                .minOperatingBalance(product.getMinOperatingBalance())
-                .termMonths(product.getTermMonths())
-                .build();
-    }
-
-    public Product toEntity (ProductDTO productDTO)
-    {
-        return Product.builder()
-                .id(productDTO.getId())
-                .productName(productDTO.getProductName())
-                .category(productDTO.getCategory())
-                .interestRate(productDTO.getInterestRate())
-                .minOperatingBalance(productDTO.getMinOperatingBalance())
-                .termMonths(productDTO.getTermMonths())
-                .build();
-    }
+        Product toEntity (ProductDTO productDTO);
 
 }
