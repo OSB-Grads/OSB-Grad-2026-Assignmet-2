@@ -3,7 +3,6 @@ package com.bank.server.repository;
 import org.springframework.stereotype.Repository;
 import com.bank.server.entity.Account;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -35,5 +34,5 @@ public interface AccountRepository extends JpaRepository<Account, String> {
                             "JOIN products p " +
                             "ON a.product_id = p.id " +
                             "WHERE a.customer_id =:customerId",nativeQuery = true)
-    List<Map<String, Object>> getAccountsWithProductByCustomerId(@Param("customerId") String customerId);
+    List<Account> getAccountsWithProductByCustomerId(@Param("customerId") String customerId);
 }
