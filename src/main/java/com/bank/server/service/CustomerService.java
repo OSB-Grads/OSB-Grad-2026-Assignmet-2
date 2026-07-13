@@ -30,7 +30,7 @@ public class CustomerService {
         }
         Customer customer = customerMapper.toEntity(dto);
         customer.setId(UuidGeneratorUtil.generateUuid());
-        customer.setRole("CUSTOMER");
+        customer.setRole("USER");
         Customer savedCustomer = customerRepository.save(customer);
         loggerService.log(
                 "CUSTOMER_CREATE",
