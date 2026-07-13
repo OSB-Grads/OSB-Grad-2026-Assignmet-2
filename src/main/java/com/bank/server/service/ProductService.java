@@ -2,14 +2,17 @@ package com.bank.server.service;
 
 import com.bank.server.dto.ProductDTO;
 import com.bank.server.entity.Product;
+import com.bank.server.enums.ProductCategory;
 import com.bank.server.exception.ProductNotFoundException;
 import com.bank.server.mapper.ProductMapper;
 import com.bank.server.repository.ProductRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +22,6 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final LoggerService loggerService;
-
 
     public List<ProductDTO> getAllProducts(){
 
@@ -42,16 +44,17 @@ public class ProductService {
         return products;
     }
 
+    @Transactional
     public ProductDTO createProduct(ProductDTO request)
     {
         log.info("Creating product");
         Product product = productMapper.toEntity(request);
-        product.setId(UuidGeneratorUtil.generateUuid());
+        product.setId(UUID.randomUUID().toString());
         product.setProductName(ProductNameGenerator.generateProductName());
 
         Product savedProduct = productRepository.save(product);
 
-        log.info("Product created successfully with id {} ",product.getId());
+        log.info("Product created successfully with id {} ",savedproduct.getId());
         loggerService.log(
                 "CREATE_PRODUCT",
                 "Created product " + savedProduct.getProductName(),
@@ -67,7 +70,7 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(()->new ProductNotFoundException("Product not found with this id : "+id));
 
-        log.info("Product Found with id {} ",id);
+        log.info("Product found with id {} ",id);
 
         loggerService.log(
                 "GET_PRODUCT_BY_ID",
@@ -86,16 +89,18 @@ public class ProductService {
             throw new ProductNotFoundException("No product categories found");
         }
 
+        log.info("Fetched {} product categories", productCategories.size());
+
         loggerService.log(
                 "GET_PRODUCT_CATEGORIES",
-                "Fetched all products category successfully",
+                "Fetched all products categories successfully",
                 LogType.SUCCESS);
 
         return productCategories;
     }
 
-    public List<ProductDTO> getAllProductsByCategory(String category) {
-        log.info("Fetching all products for {} category ",category);
+    public List<ProductDTO> getAllProductsByCategory(ProductCategory category) {
+        log.info("Fetching products for category {}",category);
         List<ProductDTO> allProducts = productRepository.findByCategory(category)
                 .stream()
                 .map(productMapper::toDTO)
@@ -108,8 +113,8 @@ public class ProductService {
         log.info("Fetched {} products for category {}  successfully",allProducts.size(),category);
 
         loggerService.log(
-                "PRODUCT_LIST_BY_CATEGORY",
-                "Accessing all products based on category successfully",
+                "GET_PRODUCTS_BY_CATEGORY",
+                "Accessing all products for category "+category+ " successfully",
                 LogType.SUCCESS);
         return allProducts;
     }

@@ -1,17 +1,13 @@
 package com.bank.server.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.bank.server.enums.ProductCategory;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -21,11 +17,12 @@ public class Product {
     @Id
     private String id;
 
-    @Column(name = "product_name" , nullable = false)
+    @Column(name = "product_name" , nullable = false ,unique = true, length = 14)
     private String productName;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "category" , nullable = false)
-    private String category;
+    private ProductCategory category;
 
     @Column(name = "interest_rate" , precision = 4 ,scale = 2 , nullable = false)
     private BigDecimal interestRate;

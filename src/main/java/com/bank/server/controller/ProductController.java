@@ -3,6 +3,7 @@ package com.bank.server.controller;
 import com.bank.server.dto.ProductDTO;
 import com.bank.server.entity.Product;
 import com.bank.server.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class ProductController {
     }
 
     @PostMapping("products")
-    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDto)
+    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductDTO productDto)
     {
         ProductDTO savedProduct = productService.createProduct(productDto);
         return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
