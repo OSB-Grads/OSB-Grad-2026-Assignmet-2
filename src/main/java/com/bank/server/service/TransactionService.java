@@ -5,6 +5,7 @@ import com.bank.server.entity.Transaction;
 import com.bank.server.exception.TransactionNotFoundException;
 import com.bank.server.mapper.TransactionMapper;
 import com.bank.server.repository.TransactionRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,17 +13,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
-
-    public TransactionService(TransactionRepository transactionRepository,
-                              TransactionMapper transactionMapper) {
-        this.transactionRepository = transactionRepository;
-        this.transactionMapper = transactionMapper;
-    }
-
     public TransactionDTO getTransactionById(String id) {
 
         Transaction transaction = transactionRepository.findById(id)
@@ -41,6 +36,17 @@ public class TransactionService {
             dtoList.add(transactionMapper.toDto(transaction));
         }
 
+        return dtoList;
+    }
+    public List<TransactionDTO> getTransactionsByCustomerId(String customerId) {
+
+        List<Transaction> transactions = transactionRepository.findByCustomerId(customerId);
+
+        List<TransactionDTO> dtoList = new ArrayList<>();
+
+        for (Transaction transaction : transactions) {
+            dtoList.add(transactionMapper.toDto(transaction));
+        }
         return dtoList;
     }
 }
