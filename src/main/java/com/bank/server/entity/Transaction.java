@@ -16,15 +16,6 @@ public class Transaction {
     @Id
     private String id;
 
-//    @Column(name="from_account_id")
-//    private String fromAccountId;
-//
-//    @Column(name="to_account_id")
-//    private String toAccountId;
-//
-//     @Column(name="customer_id")
-//    private String customerId;
-
     @Column(nullable = false)
     private String transactionType;
 
@@ -49,11 +40,11 @@ public class Transaction {
     @JoinColumn(name = "customer_id")//this customer_id is column from my transcation table
     private Customer customer;//its just we are saying get primary key from this customer table
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "from_account_id")
     private Account fromAccount;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "to_account_id")
     private Account toAccount;
 
