@@ -40,7 +40,7 @@ public class AuthService {
         Auth auth = authRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if (!auth.getPasswordHash().equals(request.getPassword())) {
+        if (!auth.getPasswordHash().matches(request.getPassword())) {
             throw new InvalidCredentialsException("Invalid username or password");
         }
 
