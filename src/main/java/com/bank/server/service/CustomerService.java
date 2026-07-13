@@ -2,6 +2,7 @@ package com.bank.server.service;
 
 import com.bank.server.dto.CustomerDTO;
 import com.bank.server.entity.Customer;
+import com.bank.server.exception.CustomerNotFoundException;
 import com.bank.server.mapper.CustomerMapper;
 import com.bank.server.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
@@ -40,7 +41,7 @@ public class CustomerService {
     public CustomerDTO getCustomerById(String id) {
 
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
 
         return customerMapper.toDto(customer);
     }
@@ -56,8 +57,8 @@ public class CustomerService {
     public CustomerDTO updateCustomer(String id, CustomerDTO dto) {
 
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
+                .orElseThrow(() -> new CustomerNotFoundException
+                        ("Customer not found with ID: " + id));
         customer.setFirstName(dto.getFirstName());
         customer.setLastName(dto.getLastName());
         customer.setDateOfBirth(dto.getDateOfBirth());
@@ -72,7 +73,7 @@ public class CustomerService {
     public void deleteCustomer(String id) {
 
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
 
         customerRepository.delete(customer);
     }
