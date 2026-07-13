@@ -1,6 +1,8 @@
 package com.bank.server.exception;
 
-public class UsernameAlreadyExistsException extends RuntimeException {
+import javax.swing.text.ChangedCharSetException;
+
+public class UsernameAlreadyExistsException extends ChangedCharSetException.UserResource {
     public UsernameAlreadyExistsException(String message) {
         super(message);
     }

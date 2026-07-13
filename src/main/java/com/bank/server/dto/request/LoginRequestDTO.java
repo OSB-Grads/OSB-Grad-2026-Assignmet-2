@@ -1,9 +1,9 @@
-package com.bank.server.dto;
+package com.bank.server.dto.request;
 
 import lombok.Data;
 
 @Data
-public class LoginRequest {
+public class LoginRequestDTO {
 
     private String username;
     private String password;

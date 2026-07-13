@@ -1,11 +1,10 @@
-package com.bank.server.dto;
+package com.bank.server.dto.request;
 
 import lombok.Data;
 
 @Data
-public class RegisterRequest {
+public class RegisterRequestDTO {
 
     private String username;
     private String password;
-
 }
