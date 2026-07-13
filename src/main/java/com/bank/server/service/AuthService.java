@@ -1,12 +1,14 @@
 package com.bank.server.service;
 
-import com.bank.server.dto.LoginRequest;
-import com.bank.server.dto.RegisterRequest;
+import com.bank.server.dto.AuthDTO;
+import com.bank.server.dto.request.LoginRequestDTO;
+import com.bank.server.dto.request.RegisterRequestDTO;
 import com.bank.server.entity.Auth;
 import com.bank.server.enums.Role;
 import com.bank.server.exception.InvalidCredentialsException;
 import com.bank.server.exception.UserNotFoundException;
 import com.bank.server.exception.UsernameAlreadyExistsException;
+import com.bank.server.mapper.AuthMapper;
 import com.bank.server.repository.AuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,8 +20,9 @@ import java.util.UUID;
 public class AuthService {
 
     private final AuthRepository authRepository;
+    private final AuthMapper authMapper;
 
-    public Auth register(RegisterRequest request) {
+    public AuthDTO register(RegisterRequestDTO request) {
 
         if (authRepository.existsByUsername(request.getUsername())) {
             throw new UsernameAlreadyExistsException("Username already exists");
@@ -32,18 +35,16 @@ public class AuthService {
                 .role(Role.CUSTOMER)
                 .build();
 
-        return authRepository.save(auth);
+        return authMapper.toDto(authRepository.save(auth));
     }
 
-    public Auth login(LoginRequest request) {
+    public AuthDTO login(LoginRequestDTO request) throws UserNotFoundException {
 
-        Auth auth = authRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-        if (!auth.getPasswordHash().matches(request.getPassword())) {
+        Auth auth = authRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UserNotFoundException("User not found"));
+        if (!auth.getPasswordHash().equals(request.getPassword())) {
             throw new InvalidCredentialsException("Invalid username or password");
         }
 
-        return auth;
+        return authMapper.toDto(auth);
     }
 }
