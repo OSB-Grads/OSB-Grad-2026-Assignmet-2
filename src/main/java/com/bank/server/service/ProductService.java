@@ -80,14 +80,10 @@ public class ProductService {
         return productMapper.toDTO(product);
     }
 
-    public List<String> getProductCategories() {
+    public List<ProductCategory> getProductCategories() {
         log.info("Fetching all product categories");
 
-        List<String> productCategories = productRepository.findAllCategories();
-
-        if(productCategories.isEmpty()){
-            throw new ProductNotFoundException("No product categories found");
-        }
+        List<ProductCategory> productCategories = List.of(ProductCategory.values());
 
         log.info("Fetched {} product categories", productCategories.size());
 

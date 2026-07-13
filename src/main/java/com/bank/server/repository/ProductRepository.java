@@ -10,7 +10,4 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String> {
     List<Product> findByCategory(ProductCategory category);
-
-    @Query("SELECT DISTINCT p.category FROM Product p")
-    List<String> findAllCategories();
 }
