@@ -31,9 +31,9 @@ public class Transaction {
     private LocalDateTime updatedAt;
 
     @PrePersist
-    public void prepersist(){createdAt=LocalDateTime.now();updatedAt=LocalDateTime.now();}
+    public void prepersist(){createdAt=LocalDateTime.now();}
     @PreUpdate
-    public void preupdate(){updatedAt=LocalDateTime.now();createdAt=LocalDateTime.now();}
+    public void preupdate(){updatedAt=LocalDateTime.now();}
 
 
     @ManyToOne// this many tro on s basically one customer id can have multiple transctions
