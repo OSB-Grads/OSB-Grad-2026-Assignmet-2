@@ -48,7 +48,7 @@ public class LoggerService {
 
         return logMapper.toDTO(savedLogEntry);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional(readOnly = true)
     public List<LogResponse> getAllLogs() {
 

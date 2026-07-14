@@ -25,7 +25,7 @@ public class TransactionService {
 
         return transactionMapper.toDto(transaction);
     }
-
+    @PreAuthorize("hasRole('CUSTOMER')")
     public List<TransactionDTO> getTransactionsByAccountId(String accountId) {
 
         List<Transaction> transactions = transactionRepository.findByAccountId(accountId);
@@ -38,6 +38,7 @@ public class TransactionService {
 
         return dtoList;
     }
+    @PreAuthorize("hasRole('CUSTOMER')")
     public List<TransactionDTO> getTransactionsByCustomerId(String customerId) {
 
         List<Transaction> transactions = transactionRepository.findByCustomerId(customerId);
