@@ -57,7 +57,7 @@ public class CustomerService {
         );
         return customerMapper.toDto(savedCustomer);
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public CustomerDTO getCustomerById(String id) {
 
         Customer customer = customerRepository.findById(id)
@@ -85,7 +85,7 @@ public class CustomerService {
 
         return customers;
     }
-
+    @PreAuthorize("hasRole('CUSTOMER')")
     public CustomerDTO updateCustomer(String id, CustomerDTO dto) {
 
         Customer customer = customerRepository.findById(id)
@@ -108,7 +108,7 @@ public class CustomerService {
 
         return customerMapper.toDto(updatedCustomer);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteCustomer(String id) {
 
         Customer customer = customerRepository.findById(id)

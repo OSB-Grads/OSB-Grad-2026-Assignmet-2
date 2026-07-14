@@ -53,7 +53,7 @@ public class AuthService {
 
         return authMapper.toDto(savedAuth);
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public AuthDTO login(LoginRequestDTO request) throws UserNotFoundException {
 
         Auth auth = authRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UserNotFoundException("User not found"));

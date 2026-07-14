@@ -22,7 +22,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final LoggerService loggerService;
-
+    @PreAuthorize("hasRole('CUSTOMER')")
     public List<ProductDTO> getAllProducts(){
 
         log.info("Fetching all products");
@@ -45,6 +45,7 @@ public class ProductService {
     }
 
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public ProductDTO createProduct(ProductDTO request)
     {
         log.info("Creating product");
@@ -63,7 +64,7 @@ public class ProductService {
         return productMapper.toDTO(savedProduct);
     }
 
-
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ProductDTO getProductById(String id) {
 
         log.info("Finding product with id {} ",id);
@@ -79,7 +80,7 @@ public class ProductService {
 
         return productMapper.toDTO(product);
     }
-
+    @PreAuthorize("hasRole('CUSTOMER')")
     public List<ProductCategory> getProductCategories() {
         log.info("Fetching all product categories");
 
@@ -94,7 +95,7 @@ public class ProductService {
 
         return productCategories;
     }
-
+    @PreAuthorize("hasRole('CUSTOMER')")
     public List<ProductDTO> getAllProductsByCategory(ProductCategory category) {
         log.info("Fetching products for category {}",category);
         List<ProductDTO> allProducts = productRepository.findByCategory(category)
