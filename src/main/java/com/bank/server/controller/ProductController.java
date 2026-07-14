@@ -1,10 +1,12 @@
 package com.bank.server.controller;
 
 import com.bank.server.dto.ProductDTO;
+import com.bank.server.dto.request.UpdateProductRequestDTO;
 import com.bank.server.entity.Product;
 import com.bank.server.enums.ProductCategory;
 import com.bank.server.service.ProductService;
 import jakarta.validation.Valid;
+import org.hibernate.sql.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,11 +45,18 @@ public class ProductController {
         return ResponseEntity.ok(productById);
     }
 
-    @GetMapping("/product-categories")
+    @GetMapping("/categories")
     public ResponseEntity<List<ProductCategory>> getAllProductCategories()
     {
         List<ProductCategory> productCategories = productService.getProductCategories();
         return ResponseEntity.ok(productCategories);
+    }
+
+    @PatchMapping("/products/{id}")
+    public ResponseEntity<ProductDTO> updateProduct(@PathVariable String id,@RequestBody UpdateProductRequestDTO request)
+    {
+        ProductDTO updatedProduct = productService.updateProduct(id,request);
+        return ResponseEntity.ok(updatedProduct);
     }
 
 }
