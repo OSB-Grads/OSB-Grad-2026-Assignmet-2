@@ -21,7 +21,7 @@ public class AuthService {
 
     private final AuthRepository authRepository;
     private final AuthMapper authMapper;
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public AuthDTO register(RegisterRequestDTO request) {
 
         if (authRepository.existsByUsername(request.getUsername())) {
@@ -37,7 +37,7 @@ public class AuthService {
 
         return authMapper.toDto(authRepository.save(auth));
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public AuthDTO login(LoginRequestDTO request) throws UserNotFoundException {
 
         Auth auth = authRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UserNotFoundException("User not found"));
