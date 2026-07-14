@@ -19,7 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
-`
+
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +33,10 @@ public class AuthService {
     public AuthDTO register(RegisterRequestDTO request) {
 
         if (authRepository.existsByUsername(request.getUsername())) {
-            throw new UsernameAlreadyExistsException("Username already exists");
+            throw new UsernameAlreadyExistsException(
+                    "AUTH_REGISTER",
+                    "Username already exists"
+            );
         }
 
         Auth auth = Auth.builder()
@@ -56,9 +59,16 @@ public class AuthService {
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public AuthDTO login(LoginRequestDTO request) throws UserNotFoundException {
 
-        Auth auth = authRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UserNotFoundException("User not found"));
+        Auth auth = authRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UserNotFoundException(
+                "AUTH_LOGIN",
+                "User not found"
+        ));
         if (!passwordEncoder.matches(request.getPassword(), auth.getPasswordHash())) {
-            throw new InvalidCredentialsException("Invalid username or password");
+            throw new InvalidCredentialsException(
+                    "AUTH_LOGIN",
+                    "Invalid username or password"
+            );
+
         }
         loggerService.log(
                 "AUTH_REGISTER",

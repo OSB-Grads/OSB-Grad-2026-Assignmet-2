@@ -34,7 +34,11 @@ public class CustomerService {
             throw new UsernameAlreadyExistsException("Username already exists");
         }
         if (customerRepository.existsByEmail(dto.getEmail())) {
-            throw new EmailAlreadyExistsException("Email already exists");
+            throw new EmailAlreadyExistsException(
+                    "CUSTOMER_CREATE",
+                    "Email already exists"
+            );
+
         }
 
 
@@ -42,7 +46,11 @@ public class CustomerService {
         int age = Period.between(dateOfBirth, LocalDate.now()).getYears();
         if (age < 18)
         {
-            throw new UnderAgeException("Customer must be at least 18 years old");
+            throw new UnderAgeException(
+                    "CUSTOMER_CREATE",
+                    "Customer must be at least 18 years old"
+            );
+
         }
 
         Customer customer = customerMapper.toEntity(dto);
