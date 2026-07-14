@@ -64,7 +64,7 @@ public class ProductService {
         return productMapper.toDTO(savedProduct);
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ProductDTO getProductById(String id) {
 
         log.info("Finding product with id {} ",id);
@@ -80,7 +80,7 @@ public class ProductService {
 
         return productMapper.toDTO(product);
     }
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public List<ProductCategory> getProductCategories() {
         log.info("Fetching all product categories");
 
@@ -95,7 +95,7 @@ public class ProductService {
 
         return productCategories;
     }
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public List<ProductDTO> getAllProductsByCategory(ProductCategory category) {
         log.info("Fetching products for category {}",category);
         List<ProductDTO> allProducts = productRepository.findByCategory(category)
