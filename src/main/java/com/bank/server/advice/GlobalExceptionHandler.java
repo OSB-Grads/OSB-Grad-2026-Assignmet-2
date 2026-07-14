@@ -1,5 +1,8 @@
 package com.bank.server.advice;
 
+import com.bank.server.dto.response.ErrorResponse;
+import com.bank.server.enums.LogType;
+import com.bank.server.exception.TransactionNotFoundException;
 import com.bank.server.dto.ErrorResponse;
 import com.bank.server.enums.LogType;
 import com.bank.server.exception.*;
@@ -19,8 +22,7 @@ public class GlobalExceptionHandler {
     private final LoggerService loggerService;
 
     @ExceptionHandler(TransactionNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleTransactionNotFound(
-            TransactionNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleTransactionNotFound(TransactionNotFoundException ex) {
 
         log.warn("{}", ex.getMessage());
 
