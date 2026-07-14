@@ -19,7 +19,6 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
     private final LoggerService loggerService;
-    @PreAuthorize("hasRole('CUSTOMER')")
     public CustomerDTO createCustomer(CustomerDTO dto) {
 
         if (customerRepository.existsByUsername(dto.getUsername())) {
