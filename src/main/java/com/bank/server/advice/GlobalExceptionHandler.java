@@ -2,6 +2,8 @@ package com.bank.server.advice;
 
 import com.bank.server.dto.response.ErrorResponse;
 import com.bank.server.enums.LogType;
+import com.bank.server.exception.ProductNotFoundException;
+import com.bank.server.exception.TransactionNotFoundException;
 import com.bank.server.exception.TransactionNotFoundException;
 import com.bank.server.dto.ErrorResponse;
 import com.bank.server.enums.LogType;
@@ -140,4 +142,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(error);
     }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleProductNotFound(ProductNotFoundException ex)
+    {
+        log.warn("{}",ex.getMessage());
+
+        loggerService.log(
+                ex.getCode(),
+                ex.getMessage(),
+                LogType.ERROR
+        );
+
+        ErrorResponse error = ErrorResponse.builder()
+                .code(ex.getCode())
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
 }
