@@ -3,6 +3,7 @@ package com.bank.server.service;
 import com.bank.server.dto.CustomerDTO;
 import com.bank.server.entity.Customer;
 import com.bank.server.exception.CustomerNotFoundException;
+import com.bank.server.exception.UsernameAlreadyExistsException;
 import com.bank.server.mapper.CustomerMapper;
 import com.bank.server.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
@@ -101,5 +102,9 @@ public class CustomerService {
                 "Customer deleted successfully with ID: " + id,
                 LogType.SUCCESS
         );
+    }
+
+    public CustomerDTO getMyProfile(String name) {
+
     }
 }

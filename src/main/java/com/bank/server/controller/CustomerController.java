@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/v1/customers")
@@ -59,5 +60,12 @@ public class CustomerController {
             @PathVariable String id) {
         customerService.deleteCustomer(id);
         return ResponseEntity.ok().body("Customer deleted successfully" );
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<CustomerDTO> getMyProfile(Authentication authentication) {
+        return ResponseEntity.ok(
+                customerService.getMyProfile(authentication.getName())
+        );
     }
 }
