@@ -1,5 +1,6 @@
 package com.bank.server.enums;
+
 public enum Role {
-    CUSTOMER,
+    USER,
     ADMIN
 }
