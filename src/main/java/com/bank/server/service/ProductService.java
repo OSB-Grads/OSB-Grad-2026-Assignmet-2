@@ -118,6 +118,7 @@ public class ProductService {
         return allProducts;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ProductDTO updateProduct(String id,UpdateProductRequestDTO request)
     {
