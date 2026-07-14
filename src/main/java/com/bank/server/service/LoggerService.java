@@ -4,7 +4,7 @@ import com.bank.server.dto.response.LogResponse;
 import com.bank.server.entity.LogEntry;
 import com.bank.server.enums.LogType;
 import com.bank.server.mapper.LogMapper;
-import com.bank.server.repository.LogEntryRepository;
+import com.bank.server.repository.LogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @Service
 public class LoggerService {
 
-    private final LogEntryRepository logEntryRepository;
+    private final LogRepository logEntryRepository;
     private final LogMapper logMapper;
 
     @Transactional
@@ -37,7 +37,7 @@ public class LoggerService {
 
         LogEntry logEntry = logMapper.toEntity(logDTO);
 
-        logEntry.setId(UuidGeneratorUtil.generateUuid());
+        logEntry.setId(UUID.randomUUID().toString());
 
         if (logEntry.getStatus() == null) {
             logEntry.setStatus(LogType.SUCCESS);
