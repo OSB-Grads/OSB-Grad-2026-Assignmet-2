@@ -13,6 +13,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 @Service
 public class JwtService {
@@ -28,7 +29,6 @@ public class JwtService {
                 iterator().next().getAuthority());
         return generateToken(claims, userDetails);
     }
-
     public String generateToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails) {
@@ -45,21 +45,10 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
     public String extractUsername(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
+        return extractClaim(token, Claims::getSubject);
     }
-
     public Date extractExpiration(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getExpiration();
+        return extractClaim(token, Claims::getExpiration);
     }
     public boolean isTokenValid(String token,
                                 UserDetails userDetails) {
@@ -68,11 +57,19 @@ public class JwtService {
                 && !extractExpiration(token).before(new Date());
     }
     public String extractRole(String token) {
-        Claims claims = Jwts.parserBuilder()
+        return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return claims.get("role", String.class);
+    }
+    public <T> T extractClaim(
+            String token,
+            Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
     }
 }
