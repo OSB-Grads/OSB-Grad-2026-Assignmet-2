@@ -7,10 +7,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateCustomerDTO {
-    private String username;
-    private String firstName;
-    private String lastName;
-    private String dateOfBirth;
     private String email;
     private String phone;
     private String address;

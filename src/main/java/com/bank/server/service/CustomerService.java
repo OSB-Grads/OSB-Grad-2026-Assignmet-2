@@ -93,15 +93,6 @@ public class CustomerService {
         if(updateDto.getEmail()!=null) {
             customer.setEmail(updateDto.getEmail());
         }
-        if(updateDto.getFirstName()!=null) {
-            customer.setFirstName(updateDto.getFirstName());
-        }
-        if(updateDto.getLastName() != null) {
-            customer.setLastName(updateDto.getLastName());
-        }
-        if(updateDto.getDateOfBirth() != null) {
-            customer.setDateOfBirth(updateDto.getDateOfBirth());
-        }
         if(updateDto.getAddress() != null) {
             customer.setAddress(updateDto.getAddress());
         }
