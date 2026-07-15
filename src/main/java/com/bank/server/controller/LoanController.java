@@ -5,6 +5,7 @@ import com.bank.server.dto.request.LoanRequestDTO;
 import com.bank.server.service.LoanService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,5 +25,10 @@ public class LoanController {
     @GetMapping
     public List<LoanDTO> getCustomerLoans() {
         return loanService.getCustomerLoans();
+    }
+    @PostMapping("/process")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void processPendingLoans() {
+        loanService.processPendingLoans();
     }
 }

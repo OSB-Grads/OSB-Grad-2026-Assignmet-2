@@ -5,19 +5,22 @@ import com.bank.server.dto.request.LoanRequestDTO;
 import com.bank.server.entity.Account;
 import com.bank.server.entity.Customer;
 import com.bank.server.entity.Loan;
-import com.bank.server.enums.LoanStatus;
-import com.bank.server.enums.LogType;
+import com.bank.server.enums.*;
 import com.bank.server.exception.*;
 import com.bank.server.mapper.LoanMapper;
-import com.bank.server.enums.LoanCategory;
 import com.bank.server.repository.AccountRepository;
 import com.bank.server.repository.CustomerRepository;
 import com.bank.server.repository.LoanRepository;
+import com.bank.server.repository.ProductRepository;
+import com.bank.server.utils.AuthenticationUtil;
 import com.bank.server.utils.Generator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
+import com.bank.server.entity.Product;
+import com.bank.server.enums.ProductCategory;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,19 +34,11 @@ public class LoanService {
     private final AccountRepository accountRepository;
     private final LoanMapper loanMapper;
     private final LoggerService loggerService;
+    private final ProductRepository productRepository;
 
     public LoanDTO requestLoan(LoanRequestDTO request) {
 
-        Authentication authentication = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new UnauthorizedException(
-                    "AUTH_ERROR",
-                    "User is not authenticated");
-        }
-
-
+        Authentication authentication = AuthenticationUtil.getAuthentication();
         String username = authentication.getName();
 
         Customer customer = customerRepository
@@ -68,15 +63,23 @@ public class LoanService {
             throw new LoanRequestException
                     ("LOAN_REQUEST", "Disbursement account does not belong to the authenticated customer");
         }
+        if (request.getRequestedAmount() == null
+                || request.getRequestedAmount().compareTo(BigDecimal.ZERO) <= 0) {
+
+            throw new LoanRequestException(
+                    "LOAN_REQUEST",
+                    "Requested amount must be greater than zero"
+            );
+        }
+        if (account.getIsLocked()) {
+            throw new LoanRequestException(
+                    "LOAN_REQUEST",
+                    "Account is locked"
+            );
+        }
         // calculating the loan eligibility
         // formula - maxEligibilityAmount = acc.balance X getEligibilityMultiplier
         BigDecimal maxEligibleAmount = account.getBalance().multiply(loanCategory.getEligibilityMultiplier());
-
-        // validate requested amount
-        if (request.getRequestedAmount().compareTo(maxEligibleAmount) > 0) {
-            throw new LoanEligibilityExceededException
-                    ("LOAN_REQUEST", "Requested amount exceeds maximum eligible amount");
-        }
 
         Loan loan = loanMapper.toEntity(request);
         loan.setId(Generator.generateUuid());
@@ -102,16 +105,7 @@ public class LoanService {
      */
     public List<LoanDTO> getCustomerLoans() {
 
-        Authentication authentication = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new UnauthorizedException(
-                    "AUTH_ERROR",
-                    "User is not authenticated");
-        }
-
-
+        Authentication authentication = AuthenticationUtil.getAuthentication();
         String username = authentication.getName();
 
         Customer customer = customerRepository
@@ -126,5 +120,61 @@ public class LoanService {
                 .stream()
                 .map(loanMapper::toDto)
                 .toList();
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public void processPendingLoans() {
+
+        List<Loan> pendingLoans = loanRepository.findByStatus(LoanStatus.PENDING);
+
+        Product loanProduct = productRepository
+                .findByCategory(ProductCategory.LOAN_ACCOUNT)
+                .orElseThrow(() -> new ProductNotFoundException(
+                                "PRODUCT_FETCH",
+                                "Loan product not found"
+                        ));
+
+        for (Loan loan : pendingLoans) {
+
+            if (loan.getRequestedAmount().compareTo(loan.getMaxEligibleAmount()) > 0) {
+                loan.setStatus(LoanStatus.REJECTED);
+                loggerService.log(
+                        "LOAN_REJECT",
+                        "Loan rejected for customer "
+                                + loan.getCustomer().getId(),
+                        LogType.FAILURE
+                );
+                loanRepository.save(loan);
+                continue;
+            }
+            if (pendingLoans.isEmpty()) {
+                loggerService.log(
+                        "LOAN_PROCESS",
+                        "No pending loans found",
+                        LogType.SUCCESS
+                );
+                return;
+            }
+
+            Account account = new Account();
+            account.setId(Generator.generateUuid());
+            account.setAccountNumber(Generator.generateAccountNumber());
+            account.setCustomer(loan.getCustomer());
+            account.setProduct(loanProduct);
+            account.setBalance(loan.getRequestedAmount());
+            account.setIsLocked(false);
+            account.setTransfersEnabled(false);
+            account.setStatus(AccountStatus.ACTIVE);
+            accountRepository.save(account);
+            loan.setStatus(LoanStatus.APPROVED);
+            loanRepository.save(loan);
+
+            loggerService.log(
+                    "LOAN_APPROVE",
+                    "Loan approved with ID: "
+                            + loan.getId(),
+                    LogType.SUCCESS
+            );
+        }
     }
 }

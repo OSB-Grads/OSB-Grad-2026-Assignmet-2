@@ -7,6 +7,7 @@ public enum LoanStatus {
     REJECTED,
     ACCEPTED,
     DECLINED,
+    APPROVED,
     ACTIVE,
     CLOSED
 }

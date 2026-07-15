@@ -56,6 +56,9 @@ public class Account {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "transfers_enabled", nullable = false)
+    private Boolean transfersEnabled = true;
+
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
