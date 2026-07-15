@@ -6,6 +6,8 @@ import com.bank.server.entity.Auth;
 import com.bank.server.entity.Customer;
 import com.bank.server.enums.LogType;
 import com.bank.server.exception.CustomerNotFoundException;
+import com.bank.server.exception.EmailAlreadyExistsException;
+import com.bank.server.exception.UnderAgeException;
 import com.bank.server.exception.UsernameAlreadyExistsException;
 import com.bank.server.mapper.CustomerMapper;
 import com.bank.server.repository.AuthRepository;
@@ -14,10 +16,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+//import com.bank.server.enums.LogType;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+import java.time.Period;
 
 @Service
 @Transactional
@@ -27,12 +31,32 @@ public class CustomerService {
     private final CustomerMapper customerMapper;
     private final LoggerService loggerService;
     private final AuthRepository authRepository;
+    private final PasswordEncoder passwordencoder;
+
     public CustomerDTO createCustomer(CustomerDTO dto) {
 
         if (customerRepository.existsByEmail(dto.getEmail())) {
-            throw new UsernameAlreadyExistsException("Email already exists");
+            throw new EmailAlreadyExistsException(
+                    "CUSTOMER_CREATE",
+                    "Email already exists"
+            );
+
         }
+
+
+        LocalDate dateOfBirth = LocalDate.parse(dto.getDateOfBirth());
+        int age = Period.between(dateOfBirth, LocalDate.now()).getYears();
+        if (age < 18)
+        {
+            throw new UnderAgeException(
+                    "CUSTOMER_CREATE",
+                    "Customer must be at least 18 years old"
+            );
+
+        }
+
         Customer customer = customerMapper.toEntity(dto);
+
         Customer savedCustomer = customerRepository.save(customer);
         loggerService.log(
                 "CUSTOMER_CREATE",

@@ -1,8 +1,7 @@
 package com.bank.server.dto;
+
 import java.math.BigDecimal;
-
-import com.bank.server.enums.AccountStatus;
-
+import com.bank.server.enums.ProductCategory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

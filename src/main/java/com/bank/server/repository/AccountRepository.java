@@ -26,13 +26,11 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     @Query("UPDATE Account a SET a.isLocked = false, a.status = 'ACTIVE' WHERE a.id = :id")
     int unlockAccount(@Param("id") String id);
 
-    @Query(value = "SELECT " +
-                            "a.id, a.account_number,a.customer_id, a.product_id, " +
-                            "a.balance, a.status, a.is_locked, " +
-                            "p.product_name, p.category " +
-                            "FROM accounts a " +
-                            "JOIN products p " +
-                            "ON a.product_id = p.id " +
-                            "WHERE a.customer_id =:customerId",nativeQuery = true)
+    @Query(value = """
+            SELECT *
+            FROM accounts a
+            WHERE a.customer_id = :customerId
+            """, nativeQuery = true)
     List<Account> getAccountsWithProductByCustomerId(@Param("customerId") String customerId);
+
 }

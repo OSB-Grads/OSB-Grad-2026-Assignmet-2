@@ -6,13 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.bank.server.dto.AccountDTO;
 import com.bank.server.dto.AccountTransactionDto;
+import com.bank.server.dto.TransactionDTO;
 import com.bank.server.dto.ViewAccountResponseDTO;
-import com.bank.server.entity.Account;
 import com.bank.server.service.AccountService;
+import com.bank.server.service.TransactionService;
 import jakarta.validation.Valid;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Builder
@@ -21,14 +22,15 @@ import java.util.Map;
 public class AccountController {
 
     private final AccountService accountsService;
+    private final TransactionService transactionService;
 
     @PostMapping
     public ResponseEntity<AccountDTO> createAccount(@Valid @RequestBody AccountDTO accountDto) {
-        AccountDTO accountDto = accountsService.createAccount(accountDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(accountDto);
+        AccountDTO account = accountsService.createAccount(accountDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(account);
     }
 
-    @GetMapping 
+    @GetMapping
     public ResponseEntity<List<ViewAccountResponseDTO>> getCustomerPortfolio(
             @RequestAttribute("currentCustomerId") String customerId) {
         List<ViewAccountResponseDTO> portfolio = accountsService.getAllAccountsForCustomer(customerId);
@@ -36,11 +38,12 @@ public class AccountController {
     }
 
     @GetMapping("/{accountNumber}")
-    public ResponseEntity<accountTransactionDto> getAccountDetails(
-            @RequestAttribute("currentCustomerId") String customerId,@PathVariable("accountNumber") String accountNumber) {
-        List<ViewAccountResponseDTO> account = accountsService.getAllAccountsForAccount(customerId,accountNumber);
-        List<TransactionDto> transactions = transactionService.getTransactionsByAccountId(accountId);
-        AccountTransactionDto accountTransactionDto = AccountTransactionDto.builder().account(account).transactions(transactions).build();
+    public ResponseEntity<AccountTransactionDto> getAccountDetails(
+            @RequestAttribute("currentCustomerId") String customerId,
+            @PathVariable("accountNumber") String accountId) {
+        ViewAccountResponseDTO account = accountsService.getAccountForAccountId(customerId, accountId);
+        List<TransactionDTO> transactions = transactionService.getTransactionsByAccountId(accountId);
+        AccountTransactionDto accountTransactionDto = new AccountTransactionDto(account, transactions);
         return ResponseEntity.ok(accountTransactionDto);
     }
 }

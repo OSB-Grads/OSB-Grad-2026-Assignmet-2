@@ -19,5 +19,5 @@ public class AccountDTO {
     private String productId;
     private BigDecimal balance;
     private AccountStatus status;
-    private boolean isLocked;
+    private Boolean isLocked;
 }
