@@ -1,6 +1,7 @@
 package com.bank.server.controller;
 
 import com.bank.server.dto.AuthDTO;
+import com.bank.server.dto.CustomerDTO;
 import com.bank.server.dto.request.LoginRequestDTO;
 import com.bank.server.dto.request.RegisterRequestDTO;
 import com.bank.server.entity.Auth;
@@ -16,10 +17,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public AuthDTO register(@RequestBody RegisterRequestDTO request) {
+    public AuthDTO register(@RequestBody RegisterRequestDTO request,
+                            @RequestBody CustomerDTO dto) {
 
-        authService.register(request);
-        return authService.register(request);
+        return authService.register(request,dto);
     }
 
     @PostMapping("/login")
