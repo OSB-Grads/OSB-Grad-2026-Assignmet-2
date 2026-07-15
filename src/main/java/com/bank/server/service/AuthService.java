@@ -1,6 +1,7 @@
 package com.bank.server.service;
 
 import com.bank.server.dto.AuthDTO;
+import com.bank.server.dto.CustomerDTO;
 import com.bank.server.dto.request.LoginRequestDTO;
 import com.bank.server.dto.request.RegisterRequestDTO;
 import com.bank.server.entity.Auth;
@@ -11,6 +12,7 @@ import com.bank.server.exception.UsernameAlreadyExistsException;
 import com.bank.server.mapper.AuthMapper;
 import com.bank.server.repository.AuthRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -21,20 +23,20 @@ public class AuthService {
 
     private final AuthRepository authRepository;
     private final AuthMapper authMapper;
+    private final CustomerService customerService;
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
-    public AuthDTO register(RegisterRequestDTO request) {
-
+    public AuthDTO register(RegisterRequestDTO request, CustomerDTO customerDTO) {
         if (authRepository.existsByUsername(request.getUsername())) {
             throw new UsernameAlreadyExistsException("Username already exists");
         }
-
         Auth auth = Auth.builder()
                 .id(UUID.randomUUID().toString())
                 .username(request.getUsername())
                 .passwordHash(request.getPassword())
                 .role(Role.CUSTOMER)
                 .build();
-
+        customerDTO.setId(auth.getId());
+        customerService.createCustomer(customerDTO);
         return authMapper.toDto(authRepository.save(auth));
     }
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")

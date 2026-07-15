@@ -15,14 +15,15 @@ import org.springframework.security.core.Authentication;
 @RequiredArgsConstructor
 public class CustomerController {
     private final CustomerService customerService;
-    @PostMapping
-    public ResponseEntity<CustomerDTO> createCustomer(
-            @Valid @RequestBody CustomerDTO dto) {
-        CustomerDTO createdCustomer = customerService.createCustomer(dto);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(createdCustomer);
-    }
+//    @PostMapping
+//    public ResponseEntity<CustomerDTO> createCustomer(
+//            @Valid @RequestBody CustomerDTO dto) {
+//
+//        CustomerDTO createdCustomer = customerService.createCustomer(dto);
+//        return ResponseEntity
+//                .status(HttpStatus.CREATED)
+//                .body(createdCustomer);
+//    }
     @GetMapping("/{id}")
     public ResponseEntity<CustomerDTO> getCustomerById(
             @PathVariable String id) {
