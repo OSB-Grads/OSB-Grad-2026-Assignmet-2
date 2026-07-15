@@ -15,16 +15,8 @@ public class Customer {
 
     @Id
     private String id;
-
-    @Column(nullable = false, unique = true)
-    private String username;
-
-    @Column(nullable = false)
-    private String role;
-
     @Column(nullable = false)
     private String firstName;
-
     @Column(nullable = false)
     private String lastName;
 

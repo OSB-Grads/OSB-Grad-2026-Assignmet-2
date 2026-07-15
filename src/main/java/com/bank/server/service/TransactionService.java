@@ -26,7 +26,10 @@ public class TransactionService {
     public TransactionDTO getTransactionById(String id) {
 
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
+                .orElseThrow(() -> new TransactionNotFoundException(
+                        "Transaction_Not_Found",
+                        "Transaction not found with id: " + id
+                ));
 
         return transactionMapper.toDto(transaction);
     }
@@ -43,6 +46,7 @@ public class TransactionService {
 
         return dtoList;
     }
+
     public List<TransactionDTO> getTransactionsByCustomerId(String customerId) {
 
         List<Transaction> transactions = transactionRepository.findByCustomerId(customerId);
@@ -52,6 +56,7 @@ public class TransactionService {
         for (Transaction transaction : transactions) {
             dtoList.add(transactionMapper.toDto(transaction));
         }
+
         return dtoList;
     }
     public Transaction createTransferTransaction(
