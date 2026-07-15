@@ -1,5 +1,6 @@
 package com.bank.server.dto;
 
+import com.bank.server.enums.LoanCategory;
 import com.bank.server.enums.LoanStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +14,7 @@ import java.math.BigDecimal;
 public class LoanDTO {
     private String id;
     private String customerId;
-    private String loanCategoryId;
+    private LoanCategory loanCategory;
     private BigDecimal requestedAmount;
     private BigDecimal maxEligibleAmount;
     private BigDecimal offeredRate;

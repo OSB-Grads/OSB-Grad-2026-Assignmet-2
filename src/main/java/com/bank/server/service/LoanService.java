@@ -5,14 +5,13 @@ import com.bank.server.dto.request.LoanRequestDTO;
 import com.bank.server.entity.Account;
 import com.bank.server.entity.Customer;
 import com.bank.server.entity.Loan;
-import com.bank.server.entity.LoanCategory;
 import com.bank.server.enums.LoanStatus;
 import com.bank.server.enums.LogType;
 import com.bank.server.exception.*;
 import com.bank.server.mapper.LoanMapper;
+import com.bank.server.enums.LoanCategory;
 import com.bank.server.repository.AccountRepository;
 import com.bank.server.repository.CustomerRepository;
-import com.bank.server.repository.LoanCategoryRepository;
 import com.bank.server.repository.LoanRepository;
 import com.bank.server.utils.Generator;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ import java.util.List;
 public class LoanService {
 
     private final LoanRepository loanRepository;
-    private final LoanCategoryRepository loanCategoryRepository;
     private final CustomerRepository customerRepository;
     private final AccountRepository accountRepository;
     private final LoanMapper loanMapper;
@@ -39,6 +37,12 @@ public class LoanService {
         Authentication authentication = SecurityContextHolder
                 .getContext()
                 .getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnauthorizedException(
+                    "AUTH_ERROR",
+                    "User is not authenticated");
+        }
+
 
         String username = authentication.getName();
 
@@ -47,10 +51,12 @@ public class LoanService {
                 .orElseThrow(() -> new CustomerNotFoundException
                         ("CUSTOMER_FETCH", "Customer not found"));
 
-        LoanCategory loanCategory = loanCategoryRepository
-                .findById(request.getLoanCategoryId())
-                .orElseThrow(() -> new LoanCategoryNotFoundException
-                        ("LOAN_CATEGORY_FETCH", "Loan category not found"));
+        LoanCategory loanCategory = request.getLoanCategory();
+        if (loanCategory == null) {
+            throw new LoanRequestException(
+                    "LOAN_REQUEST",
+                    "Loan category is required");
+        }
 
         Account account = accountRepository
                 .findById(request.getDisbursementAccountId())
@@ -99,6 +105,12 @@ public class LoanService {
         Authentication authentication = SecurityContextHolder
                 .getContext()
                 .getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnauthorizedException(
+                    "AUTH_ERROR",
+                    "User is not authenticated");
+        }
+
 
         String username = authentication.getName();
 
