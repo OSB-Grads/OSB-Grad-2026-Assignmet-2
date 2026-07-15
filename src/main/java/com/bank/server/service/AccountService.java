@@ -1,5 +1,7 @@
 package com.bank.server.service;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.bank.server.dto.AccountDTO;
@@ -28,6 +30,7 @@ public class AccountService {
     private final AccountMapper accountMapper;
     private final LoggerService loggerService;
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     public List<ViewAccountResponseDTO> getAllAccountsForCustomer(String customerId) {
         List<Account> accounts = accountRepository.getAccountsWithProductByCustomerId(customerId);
         if (accounts.isEmpty()) {
@@ -40,8 +43,8 @@ public class AccountService {
         return accounts.stream().map(accountMapper::toViewDto).toList();
     }
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ViewAccountResponseDTO getAccountForAccountId(String customerId, String accountId) {
-        System.out.println("CustomerId: " + customerId);
         Account account = accountRepository.getAccountsWithProductByCustomerId(customerId)
                 .stream()
                 .filter(acc -> acc.getId().equals(accountId))
@@ -60,6 +63,7 @@ public class AccountService {
     }
 
     @Transactional
+    @PreAuthorize("hasRole('CUSTOMER')")
     public AccountDTO createAccount(AccountDTO accountDTO) {
         Account account = accountMapper.toEntity(accountDTO);
         account.setBalance(BigDecimal.ZERO);
