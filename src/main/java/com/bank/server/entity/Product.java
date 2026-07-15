@@ -17,7 +17,7 @@ public class Product {
     @Id
     private String id;
 
-    @Column(name = "product_name" , nullable = false ,unique = true, length = 14)
+    @Column(name = "product_name" , nullable = false ,unique = true, length = 100)
     private String productName;
 
     @Enumerated(EnumType.STRING)
@@ -32,4 +32,7 @@ public class Product {
 
     @Column(name = "term_months")
     private Long termMonths;
+
+    @Column(name = "annual_withdrawal_limit")
+    private Integer annualWithdrawalLimit;
 }
