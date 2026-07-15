@@ -17,7 +17,7 @@ public class Product {
     @Id
     private String id;
 
-    @Column(name = "product_name" , nullable = false ,unique = true, length = 100)
+    @Column(name = "product_name" , nullable = false ,unique = true, length = 14)
     private String productName;
 
     @Enumerated(EnumType.STRING)
