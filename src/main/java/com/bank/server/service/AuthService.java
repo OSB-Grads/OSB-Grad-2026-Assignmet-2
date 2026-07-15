@@ -1,6 +1,7 @@
 package com.bank.server.service;
 
 import com.bank.server.dto.AuthDTO;
+import com.bank.server.dto.CustomerDTO;
 import com.bank.server.dto.request.LoginRequestDTO;
 import com.bank.server.dto.request.RegisterRequestDTO;
 import com.bank.server.entity.Auth;
@@ -12,6 +13,7 @@ import com.bank.server.exception.UsernameAlreadyExistsException;
 import com.bank.server.mapper.AuthMapper;
 import com.bank.server.repository.AuthRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,25 +29,24 @@ public class AuthService {
 
     private final AuthRepository authRepository;
     private final AuthMapper authMapper;
-    private final LoggerService loggerService;
+    private final CustomerService customerService;
+      private final LoggerService loggerService;
     private final PasswordEncoder passwordEncoder;
-
-    public AuthDTO register(RegisterRequestDTO request) {
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
+    public AuthDTO register(RegisterRequestDTO request, CustomerDTO customerDTO) {
         if (authRepository.existsByUsername(request.getUsername())) {
             throw new UsernameAlreadyExistsException(
                     "AUTH_REGISTER",
                     "Username already exists"
             );
         }
-
         Auth auth = Auth.builder()
                 .id(UUID.randomUUID().toString())
                 .username(request.getUsername())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(Role.CUSTOMER)
                 .build();
-
+     
         Auth savedAuth = authRepository.save(auth);
 
         loggerService.log(
@@ -53,6 +54,8 @@ public class AuthService {
                 "User registered successfully with username: " + savedAuth.getUsername(),
                 LogType.SUCCESS
         );
+      customerDTO.setId(auth.getId());
+        customerService.createCustomer(customerDTO);
 
         return authMapper.toDto(savedAuth);
     }

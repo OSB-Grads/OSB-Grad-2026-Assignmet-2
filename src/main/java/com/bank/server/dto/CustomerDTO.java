@@ -16,13 +16,6 @@ public class CustomerDTO {
 
     private String id;
 
-    @NotBlank(message = "Username can't be blank")
-    @Size(min = 3, max = 30, message = "Username must be between 3 and 30 characters")
-    private String username;
-
-    @NotBlank(message = "Role can't be blank")
-    private Role role = Role.USER;
-
     @NotBlank(message = "First name can't be blank")
     private String firstName;
 
