@@ -2,6 +2,7 @@ package com.bank.server.utils;
 
 import org.springframework.stereotype.Component;
 import java.security.SecureRandom;
+import java.util.UUID;
 
 @Component
 public class Generator {
@@ -34,5 +35,9 @@ public class Generator {
         sb.append("2026");
 
         return sb.toString();
+    }
+
+    public static String generateUuid() {
+        return UUID.randomUUID().toString();
     }
 }
