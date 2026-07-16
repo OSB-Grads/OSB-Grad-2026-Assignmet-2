@@ -25,7 +25,6 @@ public class JwtService {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("customerId", ((CustomUserDetails) userDetails).getCustomerId());
         claims.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
         return generateToken(claims, userDetails);
     }
@@ -34,7 +33,7 @@ public class JwtService {
             UserDetails userDetails) {
         return Jwts.builder()
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(((CustomUserDetails) userDetails).getCustomerId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -44,21 +43,19 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-    public String extractUsername(String token) {
+    public String extractCustomerId(String token) {
         return extractClaim(token, Claims::getSubject);
     }
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-    public String extractCustomerId(String token) {
-        return extractClaim(token,  claims -> claims.get("customerId", String.class));
-    }
     public boolean isTokenValid(String token,
                                 UserDetails userDetails) {
-        String username = extractUsername(token);
-        return username.equals(userDetails.getUsername())
+        String customerId = extractCustomerId(token);
+        return customerId.equals(((CustomUserDetails) userDetails).getCustomerId())
                 && !extractExpiration(token).before(new Date());
     }
+
     public String extractRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
@@ -75,6 +72,4 @@ public class JwtService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-
-
 }
