@@ -43,15 +43,19 @@ public class CustomerController {
     }
     @GetMapping("/me")
     public ResponseEntity<CustomerDTO> getMyProfile(Authentication authentication) {
+        CustomerUserDetails user = (CustomerUserDetails) authentication.getPrincipal();
+        String customerId = user.getCustomerId();
         return ResponseEntity.ok(
-                customerService.getMyProfile(authentication.getName())
+                customerService.getMyProfile(customerId)
         );
     }
     @PatchMapping("/me")
     public ResponseEntity<CustomerDTO> updateMyProfile
             (Authentication authentication, @RequestBody UpdateCustomerDTO updateDto) {
+        CustomerUserDetails user = (CustomerUserDetails) authentication.getPrincipal();
+        String customerId = user.getCustomerId();
         return ResponseEntity.ok(
-                customerService.updateMyProfile(authentication.getName(),updateDto)
+                customerService.updateMyProfile(customerId,updateDto)
         );
     }
 }
