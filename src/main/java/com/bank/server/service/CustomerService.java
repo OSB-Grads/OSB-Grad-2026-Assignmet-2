@@ -99,10 +99,7 @@ public class CustomerService {
                 LogType.SUCCESS
         );
     }
-    public CustomerDTO getMyProfile(String username) {
-        Auth auth = authRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
-        String customerId = auth.getId();
+    public CustomerDTO getMyProfile(String customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
         loggerService.log(
@@ -112,10 +109,7 @@ public class CustomerService {
         );
         return customerMapper.toDto(customer);
     }
-    public CustomerDTO updateMyProfile(String username, UpdateCustomerDTO updateDto) {
-        Auth auth = authRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
-        String customerId = auth.getId();
+    public CustomerDTO updateMyProfile(String customerId, UpdateCustomerDTO updateDto) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
         if(updateDto.getEmail()!=null) {
