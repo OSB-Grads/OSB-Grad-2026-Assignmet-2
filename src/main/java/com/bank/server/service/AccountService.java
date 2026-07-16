@@ -1,5 +1,6 @@
 package com.bank.server.service;
 
+import com.bank.server.enums.LogType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -79,5 +80,27 @@ public class AccountService {
                 LogType.SUCCESS);
         return accountMapper.toDto(savedAccount);
 
+    }
+    public Account getAccountForUpdate(String accountNumber) {
+        return accountRepository
+                .findByAccountNumberForUpdate(accountNumber)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        "Account not found with account number: " + accountNumber)
+                );
+    }
+    public void transferAmount(
+            Account sourceAccount,
+            Account destinationAccount,
+            BigDecimal amount)
+    {
+        BigDecimal sourceBalanceAfter = sourceAccount.getBalance().subtract(amount);
+
+        BigDecimal destinationBalanceAfter = destinationAccount.getBalance().add(amount);
+
+        sourceAccount.setBalance(sourceBalanceAfter);
+        destinationAccount.setBalance(destinationBalanceAfter);
+
+        accountRepository.save(sourceAccount);
+        accountRepository.save(destinationAccount);
     }
 }

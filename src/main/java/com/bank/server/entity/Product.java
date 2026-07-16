@@ -30,4 +30,7 @@ public class Product {
 
     @Column(name = "term_months")
     private Long termMonths;
+
+    @Column(name = "annual_withdrawal_limit")
+    private Integer annualWithdrawalLimit;
 }
