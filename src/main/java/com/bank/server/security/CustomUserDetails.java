@@ -14,6 +14,10 @@ public class CustomUserDetails implements UserDetails {
 
     private final Auth auth;
 
+    public String getCustomerId() {
+        return auth.getId();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(
