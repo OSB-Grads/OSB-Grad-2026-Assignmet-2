@@ -1,0 +1,83 @@
+package com.bank.server.service;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.bank.server.dto.AccountDTO;
+import com.bank.server.dto.ViewAccountResponseDTO;
+import com.bank.server.entity.Account;
+import com.bank.server.entity.Customer;
+import com.bank.server.entity.Product;
+import com.bank.server.enums.AccountStatus;
+import com.bank.server.enums.LogType;
+import com.bank.server.exception.AccountNotFoundException;
+import com.bank.server.mapper.AccountMapper;
+import com.bank.server.repository.AccountRepository;
+import com.bank.server.utils.Generator;
+import lombok.RequiredArgsConstructor;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class AccountService {
+
+    private final AccountRepository accountRepository;
+    private final AccountMapper accountMapper;
+    private final LoggerService loggerService;
+
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public List<ViewAccountResponseDTO> getAllAccountsForCustomer(String customerId) {
+        List<Account> accounts = accountRepository.getAccountsWithProductByCustomerId(customerId);
+        if (accounts.isEmpty()) {
+            throw new AccountNotFoundException("ACCOUNTS_NOT_FOUND","No Accounts found");
+        }
+        loggerService.log(
+                "FETCH_ALL_ACCOUNTS",
+                "Fetched all accounts for customer" + customerId,
+                LogType.SUCCESS);
+        return accounts.stream().map(accountMapper::toViewDto).toList();
+    }
+
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ViewAccountResponseDTO getAccountForAccountId(String customerId, String accountId) {
+        Account account = accountRepository.getAccountsWithProductByCustomerId(customerId)
+                .stream()
+                .filter(acc -> acc.getId().equals(accountId))
+                .findFirst().orElse(null);
+        if (account == null) {
+            throw new AccountNotFoundException("ACCOUNT_NOT_FOUND","No Account found");
+        }
+
+        loggerService.log(
+                "FETCH_ACCOUNT",
+                "Fetched account " + accountId,
+                LogType.SUCCESS);
+
+        ViewAccountResponseDTO accountDtos = accountMapper.toViewDto(account);
+        return accountDtos;
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public AccountDTO createAccount(AccountDTO accountDTO) {
+        Account account = accountMapper.toEntity(accountDTO);
+        account.setBalance(BigDecimal.ZERO);
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setIsLocked(false);
+        account.setAccountNumber(Generator.generateAccountNumber());
+        account.setId(Generator.generateUuid());
+        Account savedAccount = accountRepository.save(account);
+
+        loggerService.log(
+                "CREATE_ACCOUNT",
+                "Created Account ",
+                LogType.SUCCESS);
+        return accountMapper.toDto(savedAccount);
+
+    }
+}
