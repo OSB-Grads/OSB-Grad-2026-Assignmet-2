@@ -1,8 +1,12 @@
 package com.bank.server.exception;
 
-public class AccountOwnershipException extends RuntimeException {
+import lombok.Getter;
 
-    public AccountOwnershipException(String message) {
+@Getter
+public class AccountOwnershipException extends RuntimeException {
+    private final String code;
+    public AccountOwnershipException(String code, String message) {
         super(message);
+        this.code=code;
     }
 }

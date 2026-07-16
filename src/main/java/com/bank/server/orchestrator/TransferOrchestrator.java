@@ -1,10 +1,13 @@
 package com.bank.server.orchestrator;
 
 import com.bank.server.dto.request.TransferRequestDTO;
+import com.bank.server.dto.response.LogResponse;
 import com.bank.server.dto.response.TransferResponse;
 import com.bank.server.entity.Account;
 import com.bank.server.entity.Transaction;
+import com.bank.server.enums.LogType;
 import com.bank.server.service.AccountService;
+import com.bank.server.service.LoggerService;
 import com.bank.server.service.TransactionService;
 import com.bank.server.utils.TransferValidator;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +20,10 @@ public class TransferOrchestrator {
     private final AccountService accountService;
     private final TransactionService transactionService;
     private final TransferValidator validator;
+    private final LoggerService loggerService;
 
     @Transactional
-    public TransferResponse transfer(
-            String customerId,
-            TransferRequestDTO request
-    ) {
+    public TransferResponse transfer(String customerId, TransferRequestDTO request) {
         validator.validateRequest(request);
 
         Account sourceAccount = accountService.getAccountForUpdate(
@@ -47,6 +48,11 @@ public class TransferOrchestrator {
                         destinationAccount,
                         request.getAmount()
                 );
+        loggerService.log(
+                        "TRANSFER_COMPLETED",
+                        "Transfer completed successfully. Reference: " + transaction.getId(),
+                        LogType.SUCCESS
+        );
         return transactionService.toTransferResponse(
                 transaction,
                 sourceAccount,

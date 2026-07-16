@@ -1,8 +1,16 @@
 package com.bank.server.exception;
 
-public class InsufficientBalanceException extends RuntimeException {
+import lombok.Getter;
 
-    public InsufficientBalanceException(String message) {
+@Getter
+public class InsufficientBalanceException extends RuntimeException {
+    private final String code;
+
+    public InsufficientBalanceException(
+            String code,
+            String message
+    ) {
         super(message);
+        this.code = code;
     }
 }
