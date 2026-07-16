@@ -2,9 +2,12 @@ package com.bank.server.controller;
 
 import com.bank.server.dto.AuthDTO;
 import com.bank.server.dto.CustomerDTO;
+import com.bank.server.dto.LoginResponse;
 import com.bank.server.dto.request.LoginRequestDTO;
 import com.bank.server.dto.request.RegisterRequestDTO;
 import com.bank.server.entity.Auth;
+import com.bank.server.exception.UserNotFoundException;
+import com.bank.server.security.JwtService;
 import com.bank.server.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,18 +18,17 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtService jwtService;
 
     @PostMapping("/register")
     public AuthDTO register(@RequestBody RegisterRequestDTO request,
                             @RequestBody CustomerDTO dto) {
-
         return authService.register(request,dto);
     }
 
     @PostMapping("/login")
-    public AuthDTO login(@RequestBody LoginRequestDTO request) {
-
-        authService.login(request);
+    public LoginResponse login(@RequestBody LoginRequestDTO request)
+            throws UserNotFoundException {
         return authService.login(request);
     }
 }

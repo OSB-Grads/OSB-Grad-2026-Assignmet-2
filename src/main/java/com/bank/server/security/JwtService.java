@@ -49,6 +49,7 @@ public class JwtService {
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
+
     public boolean isTokenValid(String token,
                                 UserDetails userDetails) {
         String customerId = extractCustomerId(token);

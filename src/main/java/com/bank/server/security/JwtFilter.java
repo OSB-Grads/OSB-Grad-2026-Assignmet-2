@@ -32,14 +32,10 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        //make a substring of jwt without Bearer
         String jwt = authHeader.substring(7);
-        //extract username
-        String username = jwtService.extractUsername(jwt);
-        //load user by username
+        String customerId = jwtService.extractCustomerId(jwt);
         UserDetails userDetails =
-                customUserDetailsService.loadUserByUsername(username);
-        //validate it if true set in SecurityCOntextHolder to authenticatee the request and return authenticated Object
+                customUserDetailsService.loadUserByCustomerId(customerId);
         if (jwtService.isTokenValid(jwt, userDetails)) {
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
@@ -51,6 +47,5 @@ public class JwtFilter extends OncePerRequestFilter {
                     .setAuthentication(authentication);
         }
         filterChain.doFilter(request,response);
-
     }
 }
