@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -171,6 +170,24 @@ public class GlobalExceptionHandler {
                 ex.getCode(),
                 ex.getMessage(),
                 LogType.ERROR);
+
+        ErrorResponse error = ErrorResponse.builder()
+                .code(ex.getCode())
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(PaymentQueueNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentQueueNotFound(PaymentQueueNotFoundException ex){
+        log.warn("{}",ex.getMessage());
+
+        loggerService.log(
+                ex.getCode(),
+                ex.getMessage(),
+                LogType.ERROR
+        );
 
         ErrorResponse error = ErrorResponse.builder()
                 .code(ex.getCode())
