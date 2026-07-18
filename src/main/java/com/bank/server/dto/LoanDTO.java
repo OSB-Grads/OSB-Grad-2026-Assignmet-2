@@ -14,9 +14,9 @@ import java.math.BigDecimal;
 public class LoanDTO {
     private String id;
     private String customerId;
+    private String accountId;
     private LoanCategory loanCategory;
     private BigDecimal requestedAmount;
-    private BigDecimal maxEligibleAmount;
     private BigDecimal offeredRate;
     private LoanStatus status;
 }

@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.bank.server.dto.response.LoanResponseDTO;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class LoanController {
 
     // customer requests the loan
     @PostMapping("/requests")
-    public LoanDTO requestLoan(@Valid @RequestBody LoanRequestDTO request) {
+    public LoanResponseDTO requestLoan(@Valid @RequestBody LoanRequestDTO request) {
         return loanService.requestLoan(request);
     }
 

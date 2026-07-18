@@ -1,5 +1,6 @@
 package com.bank.server.entity;
 
+import com.bank.server.enums.LoanCategory;
 import com.bank.server.enums.ProductCategory;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,4 +31,8 @@ public class Product {
 
     @Column(name = "term_months")
     private Long termMonths;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "loan_category")
+    private LoanCategory loanCategory;
 }

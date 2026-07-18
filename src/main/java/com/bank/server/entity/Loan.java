@@ -39,10 +39,6 @@ public class Loan {
     @Column(name = "requested_amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal requestedAmount;
 
-    @NotNull(message = "Maximum eligible amount is required")
-    @Column(name = "max_eligible_amount", nullable = false, precision = 19, scale = 2)
-    private BigDecimal maxEligibleAmount;
-
     @NotNull(message = "Offered rate is required")
     @Column(name = "offered_rate", nullable = false, precision = 5, scale = 2)
     private BigDecimal offeredRate;
@@ -53,6 +49,7 @@ public class Loan {
     private LoanStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "disbursement_account_id", nullable = false)
-    private Account disbursementAccount;
+    @JoinColumn(name = "account_id")
+    private Account account;
+
 }

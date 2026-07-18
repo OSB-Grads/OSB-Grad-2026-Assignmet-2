@@ -27,14 +27,14 @@ public enum LoanCategory {
 
     private final String displayName;
     private final BigDecimal interestRate;
-    private final BigDecimal eligibilityMultiplier;
+    private final BigDecimal deltaPercentage;
 
     LoanCategory(String displayName,
                  BigDecimal interestRate,
-                 BigDecimal eligibilityMultiplier) {
+                 BigDecimal deltaPercentage) {
         this.displayName = displayName;
         this.interestRate = interestRate;
-        this.eligibilityMultiplier = eligibilityMultiplier;
+        this.deltaPercentage = deltaPercentage;
     }
 
 }

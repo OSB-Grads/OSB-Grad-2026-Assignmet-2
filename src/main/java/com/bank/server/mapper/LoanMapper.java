@@ -10,16 +10,16 @@ import org.mapstruct.Mapping;
 public interface LoanMapper {
 
     @Mapping(source = "customer.id", target = "customerId")
+    @Mapping(source = "account.id", target = "accountId")
     LoanDTO toDto(Loan loan);
 
     @Mapping(target = "customer", ignore = true)
-    @Mapping(target = "disbursementAccount", ignore = true)
+    @Mapping(target = "account", ignore = true)
     Loan toEntity(LoanDTO loanDTO);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "customer", ignore = true)
-    @Mapping(target = "disbursementAccount", ignore = true)
-    @Mapping(target = "maxEligibleAmount", ignore = true)
+    @Mapping(target = "account", ignore = true)
     @Mapping(target = "offeredRate", ignore = true)
     @Mapping(target = "status", ignore = true)
     Loan toEntity(LoanRequestDTO request);
