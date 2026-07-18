@@ -1,6 +1,6 @@
 package com.bank.server.dto.response;
 
-import com.bank.server.enums.PaymentStatus;
+import com.bank.server.enums.InboxStatus;
 import lombok.*;
 
 @Getter
@@ -8,8 +8,8 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentResponseDTO {
+public class InboxResponseDTO {
     private String id;
-    private PaymentStatus status;
+    private InboxStatus status;
     private String message;
 }

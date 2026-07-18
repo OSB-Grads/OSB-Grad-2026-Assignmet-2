@@ -179,8 +179,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
-    @ExceptionHandler(PaymentQueueNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlePaymentQueueNotFound(PaymentQueueNotFoundException ex){
+    @ExceptionHandler(InboxNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleInboxNotFound(InboxNotFoundException ex){
         log.warn("{}",ex.getMessage());
 
         loggerService.log(

@@ -1,9 +1,7 @@
 package com.bank.server.service;
 
-import com.bank.server.dto.PaymentQueueDTO;
-import com.bank.server.entity.PaymentQueue;
+import com.bank.server.dto.InboxDTO;
 import com.bank.server.enums.LogType;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,38 +14,37 @@ import java.util.List;
 @Slf4j
 public class PaymentService {
     private final LoggerService loggerService;
-    private final PaymentQueueService paymentQueueService;
+    private final InboxService inboxService;
     private final PaymentProcessorService paymentProcessorService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void processDeposits(){
-        processPayments(paymentQueueService.findPendingDeposits());
+        processPayments(inboxService.findPendingDeposits());
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public void processWithdrawals(){
-        processPayments(paymentQueueService.findPendingWithdrawals());
+        processPayments(inboxService.findPendingWithdrawals());
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    public void processPayments(List<PaymentQueueDTO> pendingEntries){
-        for(PaymentQueueDTO entry : pendingEntries)
+    private void processPayments(List<InboxDTO> pendingEntries){
+        for(InboxDTO entry : pendingEntries)
         {
-            log.info("Processing {} request for entry {}",entry.getType(),entry.getId());
+            log.info("Processing {} request for entry {}",entry.getMessageType(),entry.getId());
 
-
-            switch (entry.getType()){
+            switch (entry.getMessageType()){
                     case DEPOSIT : paymentProcessorService.processDeposit(entry);
                         break;
 
-                    case WITHDRAW : paymentProcessorService.processWithdrawal(entry);
+                    case WITHDRAWAL_RESPONSE: paymentProcessorService.processWithdrawal(entry);
                         break;
 
                     default:
-                        throw  new IllegalStateException("Unsupported payment type "+entry.getType());
+                        throw  new IllegalStateException("Unsupported payment type "+entry.getMessageType());
             }
             loggerService.log(
                     "PAYMENT_PROCESS",
-                    entry.getType() + " processed successfully",
+                    entry.getMessageType() + " processed successfully for inbox "+entry.getId(),
                     LogType.SUCCESS
             );
         }

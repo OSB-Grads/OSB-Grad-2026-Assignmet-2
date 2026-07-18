@@ -1,10 +1,8 @@
 package com.bank.server.controller;
 
-import com.bank.server.dto.request.DepositRequestDTO;
 import com.bank.server.dto.request.WithdrawRequestDTO;
-import com.bank.server.dto.response.PaymentResponseDTO;
-import com.bank.server.entity.PaymentQueue;
-import com.bank.server.service.PaymentQueueService;
+import com.bank.server.dto.response.InboxResponseDTO;
+import com.bank.server.service.InboxService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,26 +14,20 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/payments")
 public class PaymentController {
 
-    private final PaymentQueueService paymentQueueService;
-    @PostMapping("/deposit")
-    public ResponseEntity<PaymentResponseDTO> deposit(@Valid @RequestBody DepositRequestDTO depositRequestDTO)
-    {
-        PaymentResponseDTO depositDTO = paymentQueueService.enqueueDeposit(depositRequestDTO);
-        return new ResponseEntity<>(depositDTO,HttpStatus.CREATED);
-    }
+    private final InboxService inboxService;
 
     @PostMapping("/withdraw")
-    public ResponseEntity<PaymentResponseDTO> withdraw(@Valid @RequestBody WithdrawRequestDTO withdrawRequestDTO)
+    public ResponseEntity<InboxResponseDTO> withdraw(@Valid @RequestBody WithdrawRequestDTO withdrawRequestDTO)
     {
-        PaymentResponseDTO withdrawDTO = paymentQueueService.enqueueWithdrawal(withdrawRequestDTO);
+        InboxResponseDTO withdrawDTO = inboxService.enqueueWithdrawal(withdrawRequestDTO);
         return new ResponseEntity<>(withdrawDTO,HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PaymentResponseDTO> getPaymentStatus(
+    public ResponseEntity<InboxResponseDTO> getPaymentStatus(
             @PathVariable("id") String entryId) {
 
-        PaymentResponseDTO response = paymentQueueService.getPaymentStatus(entryId);
+        InboxResponseDTO response = inboxService.getInboxStatus(entryId);
 
         return ResponseEntity.ok(response);
     }

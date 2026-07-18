@@ -1,6 +1,6 @@
 package com.bank.server.enums;
 
-public enum PaymentStatus {
+public enum InboxStatus {
     PENDING,
     PROCESSED,
     FAILED

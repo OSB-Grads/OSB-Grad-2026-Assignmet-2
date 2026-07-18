@@ -1,6 +1,6 @@
 package com.bank.server.service;
 
-import com.bank.server.dto.PaymentQueueDTO;
+import com.bank.server.dto.InboxDTO;
 import com.bank.server.dto.TransactionDTO;
 import com.bank.server.entity.Account;
 import com.bank.server.enums.LogType;
@@ -12,25 +12,29 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.bank.server.exception.InsufficientBalanceException;
 
+import java.math.BigDecimal;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentProcessorService {
 
     private final LoggerService loggerService;
-    private final PaymentQueueService paymentQueueService;
+    private final InboxService inboxService;
     private final TransactionService transactionService;
     private final AccountRepository accountRepository;
 
     @Transactional
-    public void processDeposit(PaymentQueueDTO entry)
-    {
-        log.info("Processing deposit for account {}", entry.getTargetAccountId());
-        try{
-            Account account = accountRepository.findById(entry.getTargetAccountId())
-                    .orElseThrow(()-> new AccountNotFoundException("ACCOUNT_NOT_FOUND","Account not found for account id "+entry.getTargetAccountId()));
+    public void processDeposit(InboxDTO inbox) {
+        String targetAccountId = inbox.getPayload().get("targetAccountId").toString();
+        log.info("Processing deposit for account {}", targetAccountId);
+        try {
+            BigDecimal amount = new BigDecimal(inbox.getPayload().get("amount").toString());
 
-            account.setBalance(account.getBalance().add(entry.getAmount()));
+            Account account = accountRepository.findById(targetAccountId)
+                    .orElseThrow(() -> new AccountNotFoundException("ACCOUNT_NOT_FOUND", "Account not found for account id " + targetAccountId));
+
+            account.setBalance(account.getBalance().add(amount));
 
             Account updatedAccount = accountRepository.save(account);
 
@@ -38,26 +42,26 @@ public class PaymentProcessorService {
                     .customerId(updatedAccount.getCustomer().getId())
                     .toAccountId(updatedAccount.getId())
                     .transactionType("DEPOSIT")
-                    .amount(entry.getAmount())
+                    .amount(amount)
                     .status("COMPLETED")
                     .description("Deposit Successful")
                     .build();
 
             TransactionDTO savedTransaction = transactionService.createTransaction(transactionDTO);
 
-            log.info("Created deposit transaction {}",savedTransaction.getId());
+            log.info("Created deposit transaction {}", savedTransaction.getId());
 
-            log.info("Deposit of {} processed successfully for account {}",entry.getAmount(), updatedAccount.getId());
+            log.info("Deposit of {} processed successfully for account {}", amount, updatedAccount.getId());
 
             loggerService.log(
                     "PROCESS_DEPOSIT",
-                    "Processed deposit of " + entry.getAmount() +
-                            " to account " + updatedAccount.getAccountNumber(),
+                    "Processed deposit of " + amount +
+                            " to account " + updatedAccount.getId(),
                     LogType.SUCCESS);
 
-            paymentQueueService.deleteById(entry.getId());
+            inboxService.deleteById(inbox.getId());
 
-        }catch(AccountNotFoundException e){
+        } catch (AccountNotFoundException e) {
             log.error("Deposit processing failed:", e);
 
             loggerService.log(
@@ -65,26 +69,29 @@ public class PaymentProcessorService {
                     e.getMessage(),
                     LogType.FAILURE);
 
-            paymentQueueService.deleteById(entry.getId());
+            inboxService.deleteById(inbox.getId());
         }
     }
 
     @Transactional
-    public void processWithdrawal(PaymentQueueDTO entry)
-    {
-        log.info("Processing withdrawal for account {}", entry.getTargetAccountId());
-        try{
-            Account account = accountRepository.findById(entry.getTargetAccountId())
-                    .orElseThrow(()-> new AccountNotFoundException("ACCOUNT_NOT_FOUND","Account not found for account id "+entry.getTargetAccountId()));
+    public void processWithdrawal(InboxDTO inbox) {
+        String targetAccountId = inbox.getPayload().get("targetAccountId").toString();
+        log.info("Processing withdrawal for account {}", targetAccountId);
+        try {
+            BigDecimal amount = new BigDecimal(inbox.getPayload().get("amount").toString());
 
-            if (account.getBalance().compareTo(entry.getAmount()) < 0) {
+            Account account = accountRepository.findById(targetAccountId)
+                    .orElseThrow(() -> new AccountNotFoundException("ACCOUNT_NOT_FOUND", "Account not found for account id " + targetAccountId));
+
+
+            if (account.getBalance().compareTo(amount) < 0) {
                 throw new InsufficientBalanceException(
                         "INSUFFICIENT_BALANCE",
                         "Insufficient balance for withdrawal"
                 );
             }
 
-            account.setBalance(account.getBalance().subtract(entry.getAmount()));
+            account.setBalance(account.getBalance().subtract(amount));
 
             Account updatedAccount = accountRepository.save(account);
 
@@ -92,26 +99,26 @@ public class PaymentProcessorService {
                     .customerId(updatedAccount.getCustomer().getId())
                     .fromAccountId(updatedAccount.getId())
                     .transactionType("WITHDRAWAL")
-                    .amount(entry.getAmount())
+                    .amount(amount)
                     .status("COMPLETED")
                     .description("Withdrawal Successful")
                     .build();
 
             TransactionDTO savedTransaction = transactionService.createTransaction(transactionDTO);
 
-            log.info("Created withdrawal transaction {}",savedTransaction.getId());
+            log.info("Created withdrawal transaction {}", savedTransaction.getId());
 
-            log.info("Withdrawal of {} processed successfully for account {}",entry.getAmount(), updatedAccount.getId());
+            log.info("Withdrawal of {} processed successfully for account {}", amount, updatedAccount.getId());
 
             loggerService.log(
                     "PROCESS_WITHDRAWAL",
-                    "Processed withdrawal of " + entry.getAmount() +
-                            " from account " + updatedAccount.getAccountNumber(),
+                    "Processed withdrawal of " + amount +
+                            " from account " + updatedAccount.getId(),
                     LogType.SUCCESS);
 
-            paymentQueueService.deleteById(entry.getId());
+            inboxService.deleteById(inbox.getId());
 
-        }catch(AccountNotFoundException | InsufficientBalanceException e){
+        } catch (AccountNotFoundException | InsufficientBalanceException e) {
             log.error("Withdrawal processing failed: ", e);
 
             loggerService.log(
@@ -119,7 +126,7 @@ public class PaymentProcessorService {
                     e.getMessage(),
                     LogType.FAILURE);
 
-            paymentQueueService.deleteById(entry.getId());
+            inboxService.deleteById(inbox.getId());
         }
     }
 }

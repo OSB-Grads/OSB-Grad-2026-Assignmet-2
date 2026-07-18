@@ -17,9 +17,6 @@ public class WithdrawRequestDTO {
     @NotBlank(message = "Target account id is required")
     private String targetAccountId;
 
-    @NotBlank(message = "Real world account id is required")
-    private String realWorldAccountId;
-
     @NotNull(message = "Amount is required")
     @Positive
     private BigDecimal amount;
