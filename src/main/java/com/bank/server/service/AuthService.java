@@ -4,6 +4,7 @@ import com.bank.server.dto.AuthDTO;
 import com.bank.server.dto.CustomerDTO;
 import com.bank.server.dto.request.LoginRequestDTO;
 import com.bank.server.dto.request.RegisterRequestDTO;
+import com.bank.server.dto.response.UsernameAvailabilityResponse;
 import com.bank.server.entity.Auth;
 import com.bank.server.enums.LogType;
 import com.bank.server.enums.Role;
@@ -85,5 +86,15 @@ public class AuthService {
         return LoginResponse.builder()
                 .token(token)
                 .build();
+    }
+
+    public UsernameAvailabilityResponse checkUsernameAvailability(String username) {
+        boolean available = !authRepository.existsByUsername(username);
+        return new UsernameAvailabilityResponse(
+                available,
+                available
+                        ? "Username is available"
+                        : "Username is already taken"
+        );
     }
 }
