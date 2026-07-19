@@ -43,7 +43,7 @@ public class Account {
     private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(nullable = false)
-    private Boolean isLocked = false;
+    private Boolean locked = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

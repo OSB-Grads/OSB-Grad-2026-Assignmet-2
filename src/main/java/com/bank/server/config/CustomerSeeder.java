@@ -1,6 +1,8 @@
 package com.bank.server.config;
 
+import com.bank.server.entity.Auth;
 import com.bank.server.entity.Customer;
+import com.bank.server.repository.AuthRepository;
 import com.bank.server.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -16,16 +18,23 @@ import java.util.UUID;
 public class CustomerSeeder implements CommandLineRunner {
 
     private final CustomerRepository customerRepository;
+    private final AuthRepository authRepository;
 
     @Override
     public void run(String... args) {
+        Auth shivakumarAuth = authRepository.findByUsername("shivakumar")
+                .orElseThrow();
+
+        Auth charuAuth = authRepository.findByUsername("charu")
+                .orElseThrow();
+
+        Auth akashAuth = authRepository.findByUsername("akash")
+                .orElseThrow();
 
         if (customerRepository.count() == 0) {
 
             Customer shivakumar = new Customer();
-            shivakumar.setId(UUID.randomUUID().toString());
-            shivakumar.setUsername("shivakumar");
-            shivakumar.setRole("CUSTOMER");
+            shivakumar.setId(shivakumarAuth.getId());
             shivakumar.setFirstName("Shivakumar");
             shivakumar.setLastName("Khot");
             shivakumar.setDateOfBirth("2001-04-15");
@@ -35,9 +44,7 @@ public class CustomerSeeder implements CommandLineRunner {
             shivakumar.setNationalId("NI10001");
 
             Customer charu = new Customer();
-            charu.setId(UUID.randomUUID().toString());
-            charu.setUsername("charu");
-            charu.setRole("CUSTOMER");
+            charu.setId(charuAuth.getId());
             charu.setFirstName("Charu");
             charu.setLastName("Bohra");
             charu.setDateOfBirth("1999-08-20");
@@ -47,9 +54,7 @@ public class CustomerSeeder implements CommandLineRunner {
             charu.setNationalId("NI10002");
 
             Customer akash = new Customer();
-            akash.setId(UUID.randomUUID().toString());
-            akash.setUsername("akash");
-            akash.setRole("CUSTOMER");
+            akash.setId(akashAuth.getId());
             akash.setFirstName("Akash");
             akash.setLastName("Shakrayya");
             akash.setDateOfBirth("1998-12-10");

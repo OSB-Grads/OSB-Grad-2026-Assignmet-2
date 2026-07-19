@@ -1,5 +1,6 @@
 package com.bank.server.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,21 +33,33 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        String jwt = authHeader.substring(7);
-        String customerId = jwtService.extractCustomerId(jwt);
-        UserDetails userDetails =
-                customUserDetailsService.loadUserByCustomerId(customerId);
-        if (jwtService.isTokenValid(jwt, userDetails)) {
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
-            if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authentication);
+        try {
+            String jwt = authHeader.substring(7);
+            String customerId = jwtService.extractCustomerId(jwt);
+            UserDetails userDetails =
+                    customUserDetailsService.loadUserByCustomerId(customerId);
+            if (jwtService.isTokenValid(jwt, userDetails)
+                    && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+        } catch (JwtException | IllegalArgumentException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("""
+                    {
+                      "code":"UNAUTHORIZED",
+                      "message":"Invalid or expired JWT"
+                    }
+                    """);
+            return;
         }
         filterChain.doFilter(request,response);
     }

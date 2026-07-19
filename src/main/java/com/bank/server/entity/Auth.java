@@ -31,8 +31,8 @@ public class Auth {
     private String passwordHash;
 
 
-    @NotBlank(message = "Role is required")
+    @NotNull(message = "Role is required")
     @Enumerated(EnumType.STRING)
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     private Role role;
 }
