@@ -17,7 +17,6 @@ import com.bank.server.utils.AuthenticationUtil;
 import com.bank.server.utils.Generator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import com.bank.server.entity.Product;
@@ -37,15 +36,15 @@ public class LoanService {
     private final ProductRepository productRepository;
 
     public LoanResponseDTO requestLoan(LoanRequestDTO request) {
-        // Get the currently authenticated user's username from Spring Security
-        Authentication authentication = AuthenticationUtil.getAuthentication();
-        String username = authentication.getName();
+        String customerId = AuthenticationUtil
+                .getCurrentUser()
+                .getCustomerId();
 
         // Find the customer record corresponding to the logged-in user
         Customer customer = customerRepository
-                .findByUsername(username)
+                .findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException
-                        ("CUSTOMER_FETCH", "Customer not found"));
+                        ("CUSTOMER_NOT_FOUND", "Customer not found"));
 
         // Loan category is mandatory for every loan request
         LoanCategory loanCategory = request.getLoanCategory();
@@ -89,17 +88,15 @@ public class LoanService {
      * Returns all loans belonging to the authenticated customer.
      */
     public List<LoanDTO> getCustomerLoans() {
-        // again gets the current logged-in user
-        Authentication authentication = AuthenticationUtil.getAuthentication();
-        String username = authentication.getName();
-        // finding the customer record
-        Customer customer = customerRepository
-                .findByUsername(username)
-                .orElseThrow(() ->
-                        new CustomerNotFoundException(
-                                "CUSTOMER_FETCH",
-                                "Customer not found"
-                        ));
+        String customerId = AuthenticationUtil
+                .getCurrentUser()
+                .getCustomerId();
+
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "CUSTOMER_NOT_FOUND",
+                        "Customer not found"
+                ));
         // returns the loan record in list, but before returning converting them back to dto
         return loanRepository.findByCustomerId(customer.getId())
                 .stream()

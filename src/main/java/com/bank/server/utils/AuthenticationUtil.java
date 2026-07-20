@@ -1,6 +1,7 @@
 package com.bank.server.utils;
 
 import com.bank.server.exception.UnauthorizedException;
+import com.bank.server.security.CustomUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -20,5 +21,9 @@ public class AuthenticationUtil {
         }
 
         return authentication;
+    }
+
+    public static CustomUserDetails getCurrentUser() {
+        return (CustomUserDetails) getAuthentication().getPrincipal();
     }
 }
