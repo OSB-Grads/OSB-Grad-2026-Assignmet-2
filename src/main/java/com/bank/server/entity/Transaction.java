@@ -31,14 +31,17 @@ public class Transaction {
     private LocalDateTime updatedAt;
 
     @PrePersist
-    public void prepersist(){createdAt=LocalDateTime.now();}
+    public void prepersist() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
     @PreUpdate
     public void preupdate(){updatedAt=LocalDateTime.now();}
 
-
-    @ManyToOne// this many tro on s basically one customer id can have multiple transctions
-    @JoinColumn(name = "customer_id")//this customer_id is column from my transcation table
-    private Customer customer;//its just we are saying get primary key from this customer table
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
     @ManyToOne
     @JoinColumn(name = "from_account_id")
