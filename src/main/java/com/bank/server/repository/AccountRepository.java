@@ -1,5 +1,7 @@
 package com.bank.server.repository;
 
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;
 import com.bank.server.entity.Account;
 import java.util.List;
@@ -13,6 +15,15 @@ import org.springframework.data.repository.query.Param;
 public interface AccountRepository extends JpaRepository<Account, String> {
 
     Optional<Account> findByAccountNumber(String accountNumber);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            SELECT a
+            FROM Account a
+            JOIN FETCH a.customer
+            JOIN FETCH a.product
+            WHERE a.accountNumber = :accountNumber
+            """)
+    Optional<Account> findByAccountNumberForUpdate(@Param("accountNumber") String accountNumber);
 
     List<Account> findByCustomerId(String customerId);
 

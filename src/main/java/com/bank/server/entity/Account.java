@@ -27,7 +27,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "accounts")
 @Builder
 public class Account {
-
     @Id
     private String id;
 
@@ -66,7 +65,6 @@ public class Account {
         createdAt = LocalDateTime.now();
         updatedAt=LocalDateTime.now();
     }
-
     @PreUpdate
     public void preUpdate() {
         updatedAt = LocalDateTime.now();

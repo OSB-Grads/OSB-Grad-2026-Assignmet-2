@@ -23,6 +23,10 @@ public class Product {
     @Column(name = "category" , nullable = false)
     private ProductCategory category;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "loan_category")
+    private LoanCategory loanCategory;
+
     @Column(name = "interest_rate" , precision = 4 ,scale = 2 , nullable = false)
     private BigDecimal interestRate;
 
@@ -32,7 +36,6 @@ public class Product {
     @Column(name = "term_months")
     private Long termMonths;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "loan_category")
-    private LoanCategory loanCategory;
+    @Column(name = "annual_withdrawal_limit")
+    private Integer annualWithdrawalLimit;
 }

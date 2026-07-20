@@ -1,5 +1,5 @@
 package com.bank.server.service;
-
+import com.bank.server.dto.LoginResponse;
 import com.bank.server.dto.AuthDTO;
 import com.bank.server.dto.CustomerDTO;
 import com.bank.server.dto.request.LoginRequestDTO;
@@ -7,21 +7,22 @@ import com.bank.server.dto.request.RegisterRequestDTO;
 import com.bank.server.entity.Auth;
 import com.bank.server.enums.LogType;
 import com.bank.server.enums.Role;
-import com.bank.server.exception.InvalidCredentialsException;
 import com.bank.server.exception.UserNotFoundException;
 import com.bank.server.exception.UsernameAlreadyExistsException;
 import com.bank.server.mapper.AuthMapper;
 import com.bank.server.repository.AuthRepository;
+import com.bank.server.security.CustomUserDetails;
+import com.bank.server.security.CustomUserDetailsService;
+import com.bank.server.security.JwtService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +31,13 @@ public class AuthService {
     private final AuthRepository authRepository;
     private final AuthMapper authMapper;
     private final CustomerService customerService;
-      private final LoggerService loggerService;
+    private final LoggerService loggerService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService  jwtService;
+    private final CustomUserDetailsService customUserDetailsService;
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
+    @Transactional
     public AuthDTO register(RegisterRequestDTO request, CustomerDTO customerDTO) {
         if (authRepository.existsByUsername(request.getUsername())) {
             throw new UsernameAlreadyExistsException(
@@ -46,7 +51,7 @@ public class AuthService {
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(Role.CUSTOMER)
                 .build();
-     
+
         Auth savedAuth = authRepository.save(auth);
 
         loggerService.log(
@@ -56,29 +61,29 @@ public class AuthService {
         );
       customerDTO.setId(auth.getId());
         customerService.createCustomer(customerDTO);
-
         return authMapper.toDto(savedAuth);
     }
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
-    public AuthDTO login(LoginRequestDTO request) throws UserNotFoundException {
-
-        Auth auth = authRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UserNotFoundException(
-                "AUTH_LOGIN",
-                "User not found"
-        ));
-        if (!passwordEncoder.matches(request.getPassword(), auth.getPasswordHash())) {
-            throw new InvalidCredentialsException(
-                    "AUTH_LOGIN",
-                    "Invalid username or password"
-            );
-
-        }
+    public LoginResponse login(LoginRequestDTO request) throws UserNotFoundException {
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getUsername(),
+                                request.getPassword()
+                        )
+                );
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+        assert userDetails != null;
+        String token = jwtService.generateToken(userDetails);
         loggerService.log(
-                "AUTH_REGISTER",
-                "User logged in successfully with username "
-                        + auth.getUsername(),
+                "AUTH_LOGIN",
+                "User logged in successfully with username: "
+                        + userDetails.getUsername(),
                 LogType.SUCCESS
         );
-        return authMapper.toDto(auth);
+        return LoginResponse.builder()
+                .token(token)
+                .build();
     }
 }

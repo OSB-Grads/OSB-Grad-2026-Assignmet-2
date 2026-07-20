@@ -37,15 +37,17 @@ public class LoanService {
     private final ProductRepository productRepository;
 
     public LoanResponseDTO requestLoan(LoanRequestDTO request) {
-    // gets the currently logged-in user
+        // Get the currently authenticated user's username from Spring Security
         Authentication authentication = AuthenticationUtil.getAuthentication();
         String username = authentication.getName();
-    // fetch the authenticated customer's record
+
+        // Find the customer record corresponding to the logged-in user
         Customer customer = customerRepository
                 .findByUsername(username)
                 .orElseThrow(() -> new CustomerNotFoundException
                         ("CUSTOMER_FETCH", "Customer not found"));
-    // prevents the user from submitting the loan request without relevant category
+
+        // Loan category is mandatory for every loan request
         LoanCategory loanCategory = request.getLoanCategory();
         if (loanCategory == null) {
             throw new LoanRequestException(
@@ -61,9 +63,10 @@ public class LoanService {
                     "Requested amount must be greater than zero"
             );
         }
-
-        // here mapper is converting our loan Dto to loan entity
+        // Convert request DTO into Loan entity
         Loan loan = loanMapper.toEntity(request);
+
+        // Populate fields that should never come directly from the client
         loan.setStatus(LoanStatus.PENDING);
         loan.setId(Generator.generateUuid());
         loan.setCustomer(customer);
@@ -71,6 +74,7 @@ public class LoanService {
         loan.setOfferedRate(loanCategory.getInterestRate());
         loanRepository.save(loan);
 
+        // Record successful loan request for auditing
         loggerService.log(
                 "LOAN_REQUEST",
                 "Loan request created successfully with ID: " + loan.getId(),
@@ -102,6 +106,8 @@ public class LoanService {
                 .map(loanMapper::toDto)
                 .toList();
     }
+
+
     // admin has to see the pending loans
     @PreAuthorize("hasRole('ADMIN')")
     public List<LoanDTO> getPendingLoans() {
@@ -132,9 +138,9 @@ public class LoanService {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void processPendingLoans() {
-
+        // Fetch all loan requests waiting for admin approval
         List<Loan> pendingLoans = loanRepository.findByStatus(LoanStatus.PENDING);
-
+        // If there are no pending requests, stop processing
         if (pendingLoans.isEmpty()) {
             loggerService.log(
                     "LOAN_PROCESS",
@@ -143,13 +149,27 @@ public class LoanService {
             );
             return;
         }
-
+        // Admin processes each pending loan one by one
         for (Loan loan : pendingLoans) {
 
-            Product loanProduct = productRepository
-                    .findByLoanCategory(loan.getLoanCategory())
-                    .get(0);
+            // Fetch the loan product associated with the selected loan category
+            // Retrieve the loan product corresponding to the loan category
+           // PERSONAL -> Personal Loan Product
+            List<Product> products = productRepository.findByLoanCategory(loan.getLoanCategory());
 
+            // Every loan category should have one configured loan product
+            if (products.isEmpty()) {
+                throw new ProductNotFoundException(
+                        "PRODUCT_NOT_FOUND",
+                        "No product found for loan category: " + loan.getLoanCategory()
+                );
+            }
+
+            // use the first product from the list
+            Product loanProduct = products.get(0);
+
+            // Create a new loan account for the customer
+            // The requested loan amount is credited as the opening balance
             Account account = Account.builder()
                     .id(Generator.generateUuid())
                     .accountNumber(Generator.generateAccountNumber())
@@ -161,18 +181,23 @@ public class LoanService {
                     .status(AccountStatus.ACTIVE)
                     .build();
 
+            // Save the newly created loan account
             Account savedAccount = accountRepository.save(account);
+
+            // Associate the created account with the approved loan
             loan.setAccount(savedAccount);
 
-            loan.setAccount(account);
+            // Update the loan status from PENDING to APPROVED
             loan.setStatus(LoanStatus.APPROVED);
-
             loanRepository.save(loan);
 
             loggerService.log(
                     "LOAN_APPROVE",
-                    "Loan approved successfully. Loan ID: " + loan.getId()                    LogType.SUCCESS
-            );
+                    "Loan approved successfully. Loan ID: " + loan.getId(),
+                    LogType.SUCCESS);
+
+
+
         }
     }
 }

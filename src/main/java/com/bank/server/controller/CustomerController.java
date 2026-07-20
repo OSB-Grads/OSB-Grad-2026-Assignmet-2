@@ -1,6 +1,7 @@
 package com.bank.server.controller;
 import com.bank.server.dto.CustomerDTO;
 import com.bank.server.dto.UpdateCustomerDTO;
+import com.bank.server.security.CustomUserDetails;
 import com.bank.server.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,15 +44,19 @@ public class CustomerController {
     }
     @GetMapping("/me")
     public ResponseEntity<CustomerDTO> getMyProfile(Authentication authentication) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        String customerId = user.getCustomerId();
         return ResponseEntity.ok(
-                customerService.getMyProfile(authentication.getName())
+                customerService.getMyProfile(customerId)
         );
     }
     @PatchMapping("/me")
     public ResponseEntity<CustomerDTO> updateMyProfile
             (Authentication authentication, @RequestBody UpdateCustomerDTO updateDto) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        String customerId = user.getCustomerId();
         return ResponseEntity.ok(
-                customerService.updateMyProfile(authentication.getName(),updateDto)
+                customerService.updateMyProfile(customerId,updateDto)
         );
     }
 }
