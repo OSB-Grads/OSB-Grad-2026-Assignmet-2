@@ -4,6 +4,7 @@ import com.bank.server.dto.TransactionDTO;
 import com.bank.server.entity.Account;
 import com.bank.server.entity.Customer;
 import com.bank.server.entity.Transaction;
+import com.bank.server.enums.TransactionStatus;
 import com.bank.server.exception.AccountNotFoundException;
 import com.bank.server.exception.CustomerNotFoundException;
 import com.bank.server.exception.TransactionNotFoundException;
@@ -11,6 +12,7 @@ import com.bank.server.mapper.TransactionMapper;
 import com.bank.server.repository.AccountRepository;
 import com.bank.server.repository.CustomerRepository;
 import com.bank.server.repository.TransactionRepository;
+import com.bank.server.utils.Generator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -68,7 +70,7 @@ public class TransactionService {
     {
         Transaction transaction = transactionMapper.toEntity(transactionDTO);
 
-        transaction.setId(UUID.randomUUID().toString());
+        transaction.setId(Generator.generateUuid());
 
         Customer customer = customerRepository.findById(transactionDTO.getCustomerId())
                 .orElseThrow(()->new CustomerNotFoundException("CUTSOMER_NOT_FOUND","Customer not found for transaction creation"));
@@ -92,5 +94,17 @@ public class TransactionService {
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         return transactionMapper.toDto(savedTransaction);
+    }
+
+    public TransactionDTO updateTransaction(String transactionId , TransactionStatus status)
+    {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(()->new TransactionNotFoundException("TRANSACTION_NOT_FOUND","Transaction not found for id "+transactionId));
+
+        transaction.setStatus(status);
+
+        Transaction updatedTransaction = transactionRepository.save(transaction);
+
+        return transactionMapper.toDto(updatedTransaction);
     }
 }

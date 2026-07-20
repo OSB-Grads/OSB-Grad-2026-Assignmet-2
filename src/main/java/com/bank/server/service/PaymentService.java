@@ -31,22 +31,34 @@ public class PaymentService {
         for(InboxDTO entry : pendingEntries)
         {
             log.info("Processing {} request for entry {}",entry.getMessageType(),entry.getId());
-
-            switch (entry.getMessageType()){
-                    case DEPOSIT : paymentProcessorService.processDeposit(entry);
+            try {
+                switch (entry.getMessageType()) {
+                    case DEPOSIT:
+                        paymentProcessorService.processDeposit(entry);
                         break;
 
-                    case WITHDRAWAL_RESPONSE: paymentProcessorService.processWithdrawal(entry);
+                    case WITHDRAWAL_RESPONSE:
+                        paymentProcessorService.processWithdrawal(entry);
                         break;
 
                     default:
-                        throw  new IllegalStateException("Unsupported payment type "+entry.getMessageType());
+                        throw new IllegalStateException("Unsupported payment type " + entry.getMessageType());
+                }
+                loggerService.log(
+                        "PAYMENT_PROCESS",
+                        entry.getMessageType() + " processed successfully for inbox " + entry.getId(),
+                        LogType.SUCCESS
+                );
+            }catch (Exception e) {
+
+                log.error("Failed to process inbox {}", entry.getId(), e);
+
+                loggerService.log(
+                        "PAYMENT_PROCESS",
+                        "Failed to process inbox " + entry.getId() + ": " + e.getMessage(),
+                        LogType.FAILURE
+                );
             }
-            loggerService.log(
-                    "PAYMENT_PROCESS",
-                    entry.getMessageType() + " processed successfully for inbox "+entry.getId(),
-                    LogType.SUCCESS
-            );
         }
     }
 }

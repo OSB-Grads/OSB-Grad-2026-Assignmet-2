@@ -3,6 +3,7 @@ package com.bank.server.config;
 import com.bank.server.entity.Account;
 import com.bank.server.entity.Customer;
 import com.bank.server.entity.Transaction;
+import com.bank.server.enums.TransactionStatus;
 import com.bank.server.repository.AccountRepository;
 import com.bank.server.repository.CustomerRepository;
 import com.bank.server.repository.TransactionRepository;
@@ -54,7 +55,7 @@ public class TransactionSeeder implements CommandLineRunner {
             transaction1.setToAccount(account2);
             transaction1.setTransactionType("TRANSFER");
             transaction1.setAmount(new BigDecimal("5000.00"));
-            transaction1.setStatus("SUCCESS");
+            transaction1.setStatus(TransactionStatus.COMPLETED);
             transaction1.setDescription("Transfer to Charu");
 
             Transaction transaction2 = new Transaction();
@@ -64,7 +65,7 @@ public class TransactionSeeder implements CommandLineRunner {
             transaction2.setToAccount(account3);
             transaction2.setTransactionType("TRANSFER");
             transaction2.setAmount(new BigDecimal("3000.00"));
-            transaction2.setStatus("SUCCESS");
+            transaction2.setStatus(TransactionStatus.COMPLETED);
             transaction2.setDescription("Transfer to Akash");
 
             Transaction transaction3 = new Transaction();
@@ -74,7 +75,7 @@ public class TransactionSeeder implements CommandLineRunner {
             transaction3.setToAccount(account1);
             transaction3.setTransactionType("TRANSFER");
             transaction3.setAmount(new BigDecimal("2500.00"));
-            transaction3.setStatus("SUCCESS");
+            transaction3.setStatus(TransactionStatus.COMPLETED);
             transaction3.setDescription("Transfer to Shivakumar");
 
             transactionRepository.saveAll(List.of(
