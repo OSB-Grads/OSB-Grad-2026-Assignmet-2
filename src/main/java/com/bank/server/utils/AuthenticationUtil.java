@@ -26,4 +26,8 @@ public class AuthenticationUtil {
     public static CustomUserDetails getCurrentUser() {
         return (CustomUserDetails) getAuthentication().getPrincipal();
     }
+
+    public static String getCurrentCustomerId() {
+        return getCurrentUser().getCustomerId();
+    }
 }

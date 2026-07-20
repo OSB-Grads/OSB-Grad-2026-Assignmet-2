@@ -36,6 +36,7 @@ public class LoanService {
     private final ProductRepository productRepository;
 
     public LoanResponseDTO requestLoan(LoanRequestDTO request) {
+        // gets the current authenticated user
         String customerId = AuthenticationUtil
                 .getCurrentUser()
                 .getCustomerId();

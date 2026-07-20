@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 public class Loan {
 
     @Id
-    @NotBlank(message = "Loan id cannot be blank")
     @Column(name = "id")
     private String id;
 
