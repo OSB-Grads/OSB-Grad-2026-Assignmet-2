@@ -69,7 +69,7 @@ public class AccountService {
         Account account = accountMapper.toEntity(accountDTO);
         account.setBalance(BigDecimal.ZERO);
         account.setStatus(AccountStatus.ACTIVE);
-        account.setIsLocked(false);
+        account.setLocked(false);
         account.setAccountNumber(Generator.generateAccountNumber());
         account.setId(Generator.generateUuid());
         Account savedAccount = accountRepository.save(account);
@@ -85,6 +85,7 @@ public class AccountService {
         return accountRepository
                 .findByAccountNumberForUpdate(accountNumber)
                 .orElseThrow(() -> new AccountNotFoundException(
+                        "ACCOUNT_NOT_FOUND",
                         "Account not found with account number: " + accountNumber)
                 );
     }

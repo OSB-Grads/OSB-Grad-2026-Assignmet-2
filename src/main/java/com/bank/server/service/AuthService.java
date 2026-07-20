@@ -36,7 +36,6 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService  jwtService;
     private final CustomUserDetailsService customUserDetailsService;
-    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     @Transactional
     public AuthDTO register(RegisterRequestDTO request, CustomerDTO customerDTO) {
         if (authRepository.existsByUsername(request.getUsername())) {
@@ -63,7 +62,6 @@ public class AuthService {
         customerService.createCustomer(customerDTO);
         return authMapper.toDto(savedAuth);
     }
-    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public LoginResponse login(LoginRequestDTO request) throws UserNotFoundException {
         Authentication authentication =
                 authenticationManager.authenticate(

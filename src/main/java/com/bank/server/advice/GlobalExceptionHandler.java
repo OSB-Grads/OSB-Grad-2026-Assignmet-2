@@ -9,7 +9,7 @@ import com.bank.server.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
+import com.bank.server.dto.response.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import lombok.extern.slf4j.Slf4j;
@@ -234,7 +234,7 @@ public class GlobalExceptionHandler {
     }
 
    @ExceptionHandler(AccountNotFoundException.class)
-    public ResponseEntity<String> handleAccountNotFound(
+    public ResponseEntity<ErrorResponse> handleAccountNotFound(
             AccountNotFoundException ex) {
 
         log.warn("{}", ex.getMessage());
