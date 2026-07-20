@@ -30,8 +30,6 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
     private final LoggerService loggerService;
-    private final AuthRepository authRepository;
-    private final PasswordEncoder passwordencoder;
 
     public CustomerDTO createCustomer(CustomerDTO dto) {
 

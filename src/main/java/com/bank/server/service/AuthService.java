@@ -4,6 +4,7 @@ import com.bank.server.dto.AuthDTO;
 import com.bank.server.dto.CustomerDTO;
 import com.bank.server.dto.request.LoginRequestDTO;
 import com.bank.server.dto.request.RegisterRequestDTO;
+import com.bank.server.dto.response.UsernameAvailabilityResponse;
 import com.bank.server.entity.Auth;
 import com.bank.server.enums.LogType;
 import com.bank.server.enums.Role;
@@ -36,7 +37,6 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService  jwtService;
     private final CustomUserDetailsService customUserDetailsService;
-    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     @Transactional
     public AuthDTO register(RegisterRequestDTO request, CustomerDTO customerDTO) {
         if (authRepository.existsByUsername(request.getUsername())) {
@@ -63,7 +63,6 @@ public class AuthService {
         customerService.createCustomer(customerDTO);
         return authMapper.toDto(savedAuth);
     }
-    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public LoginResponse login(LoginRequestDTO request) throws UserNotFoundException {
         Authentication authentication =
                 authenticationManager.authenticate(
@@ -85,5 +84,15 @@ public class AuthService {
         return LoginResponse.builder()
                 .token(token)
                 .build();
+    }
+
+    public UsernameAvailabilityResponse checkUsernameAvailability(String username) {
+        boolean available = !authRepository.existsByUsername(username);
+        return new UsernameAvailabilityResponse(
+                available,
+                available
+                        ? "Username is available"
+                        : "Username is already taken"
+        );
     }
 }

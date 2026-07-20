@@ -30,11 +30,11 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     List<Account> findByProductId(String productId);
 
     @Modifying
-    @Query("UPDATE Account a SET a.isLocked = true, a.status = 'ACTIVE' WHERE a.id = :id")
+    @Query("UPDATE Account a SET a.locked = true, a.status = 'ACTIVE' WHERE a.id = :id")
     int lockAccount(@Param("id") String id);
 
     @Modifying
-    @Query("UPDATE Account a SET a.isLocked = false, a.status = 'ACTIVE' WHERE a.id = :id")
+    @Query("UPDATE Account a SET a.locked = false, a.status = 'ACTIVE' WHERE a.id = :id")
     int unlockAccount(@Param("id") String id);
 
     @Query(value = """
