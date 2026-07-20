@@ -29,6 +29,6 @@ public class TransactionController {
             @PathVariable String accountId) {
 
         return ResponseEntity.ok(
-                transactionService.getTransactionsByAccountId(accountId));
+                transactionService.getTransactionsByAccountNumber(accountId));
     }
 }

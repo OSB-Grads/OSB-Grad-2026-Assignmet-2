@@ -6,6 +6,7 @@ import com.bank.server.entity.Account;
 import com.bank.server.entity.Transaction;
 import com.bank.server.exception.TransactionNotFoundException;
 import com.bank.server.mapper.TransactionMapper;
+import com.bank.server.repository.AccountRepository;
 import com.bank.server.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
+    private final AccountRepository accountRepository;
 
     public TransactionDTO getTransactionById(String id) {
 
@@ -34,8 +36,9 @@ public class TransactionService {
         return transactionMapper.toDto(transaction);
     }
 
-    public List<TransactionDTO> getTransactionsByAccountId(String accountId) {
-
+    public List<TransactionDTO> getTransactionsByAccountNumber(String accountNumber) {
+        Optional<Account> account =accountRepository.findByAccountNumber(accountNumber);
+        String accountId=account.get().getId();
         List<Transaction> transactions = transactionRepository.findByAccountId(accountId);
 
         List<TransactionDTO> dtoList = new ArrayList<>();

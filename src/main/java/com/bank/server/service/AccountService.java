@@ -45,10 +45,10 @@ public class AccountService {
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ViewAccountResponseDTO getAccountForAccountId(String customerId, String accountId) {
+    public ViewAccountResponseDTO getAccountForAccountId(String customerId, String accountNumber) {
         Account account = accountRepository.getAccountsWithProductByCustomerId(customerId)
                 .stream()
-                .filter(acc -> acc.getId().equals(accountId))
+                .filter(acc -> acc.getAccountNumber().equals(accountNumber))
                 .findFirst().orElse(null);
         if (account == null) {
             throw new AccountNotFoundException("ACCOUNT_NOT_FOUND","No Account found");
@@ -56,7 +56,7 @@ public class AccountService {
 
         loggerService.log(
                 "FETCH_ACCOUNT",
-                "Fetched account " + accountId,
+                "Fetched account " + accountNumber,
                 LogType.SUCCESS);
 
         ViewAccountResponseDTO accountDtos = accountMapper.toViewDto(account);
