@@ -1,5 +1,6 @@
 package com.bank.server.entity;
 
+import com.bank.server.enums.LoanCategory;
 import com.bank.server.enums.ProductCategory;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,6 +22,10 @@ public class Product {
     @Enumerated(EnumType.STRING)
     @Column(name = "category" , nullable = false)
     private ProductCategory category;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "loan_category")
+    private LoanCategory loanCategory;
 
     @Column(name = "interest_rate" , precision = 4 ,scale = 2 , nullable = false)
     private BigDecimal interestRate;

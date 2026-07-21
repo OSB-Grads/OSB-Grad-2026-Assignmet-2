@@ -8,12 +8,15 @@ import com.bank.server.dto.request.RegisterRequestDTO;
 import com.bank.server.security.CustomUserDetails;
 import com.bank.server.service.CustomerService;
 import lombok.RequiredArgsConstructor;
+import com.bank.server.dto.response.UsernameAvailabilityResponse;
 import com.bank.server.entity.Auth;
 import com.bank.server.exception.UserNotFoundException;
 import com.bank.server.security.JwtService;
 import com.bank.server.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.bank.server.dto.request.RegistrationRequestDTO;
 import jakarta.validation.Valid;
@@ -60,5 +63,13 @@ public class AuthController {
         String customerId = currentUser.getCustomerId();
         CustomerDTO customer = customerService.getMyProfile(customerId);
         return ResponseEntity.ok(customer);
+    }
+    @GetMapping("/check-username")
+    public ResponseEntity<UsernameAvailabilityResponse> checkUsername(
+            @RequestParam String username
+    ) {
+        UsernameAvailabilityResponse response =
+                authService.checkUsernameAvailability(username);
+        return ResponseEntity.ok(response);
     }
 }

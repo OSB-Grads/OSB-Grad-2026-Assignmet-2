@@ -15,6 +15,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,6 +25,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "accounts")
+@Builder
 public class Account {
     @Id
     private String id;
@@ -54,6 +56,9 @@ public class Account {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "transfers_enabled", nullable = false)
+    private Boolean transfersEnabled = true;
 
     @PrePersist
     public void prePersist() {
