@@ -25,12 +25,12 @@ public class TransactionController {
                 transactionService.getTransactionById(id));
     }
 
-    @GetMapping("/account/{accountId}")
+    @GetMapping("/{accountId}")
     public ResponseEntity<List<TransactionDTO>> getTransactionsByAccountId(
             @PathVariable String accountId) {
 
         return ResponseEntity.ok(
-                transactionService.getTransactionsByAccountId(accountId));
+                transactionService.getTransactionsByAccountNumber(accountId));
     }
 
     @GetMapping("/status/{transactionId}")

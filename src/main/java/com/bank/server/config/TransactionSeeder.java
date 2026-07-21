@@ -1,10 +1,12 @@
 package com.bank.server.config;
 
 import com.bank.server.entity.Account;
+import com.bank.server.entity.Auth;
 import com.bank.server.entity.Customer;
 import com.bank.server.entity.Transaction;
 import com.bank.server.enums.TransactionStatus;
 import com.bank.server.repository.AccountRepository;
+import com.bank.server.repository.AuthRepository;
 import com.bank.server.repository.CustomerRepository;
 import com.bank.server.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,19 +26,26 @@ public class TransactionSeeder implements CommandLineRunner {
     private final TransactionRepository transactionRepository;
     private final CustomerRepository customerRepository;
     private final AccountRepository accountRepository;
+    private final AuthRepository authRepository;
 
     @Override
     public void run(String... args) {
 
         if (transactionRepository.count() == 0) {
 
-            Customer shivakumar = customerRepository.findByUsername("shivakumar")
+            Auth shivakumarAuth = authRepository.findByUsername("shivakumar")
+                    .orElseThrow();
+            Customer shivakumar = customerRepository.findById(shivakumarAuth.getId())
                     .orElseThrow();
 
-            Customer charu = customerRepository.findByUsername("charu")
+            Auth charuAuth = authRepository.findByUsername("charu")
+                    .orElseThrow();
+            Customer charu = customerRepository.findById(charuAuth.getId())
                     .orElseThrow();
 
-            Customer akash = customerRepository.findByUsername("akash")
+            Auth akashAuth = authRepository.findByUsername("akash")
+                    .orElseThrow();
+            Customer akash = customerRepository.findById(akashAuth.getId())
                     .orElseThrow();
 
             Account account1 = accountRepository.findByAccountNumber("ACC100001")

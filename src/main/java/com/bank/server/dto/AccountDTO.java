@@ -13,11 +13,10 @@ import lombok.NoArgsConstructor;
 public class AccountDTO {
     private String id;
     private String accountNumber;
-    @NotBlank(message = "Customer Id cannot be Blank")
     private String customerId;
     @NotBlank(message = "Product Id cannot be Blank")
     private String productId;
     private BigDecimal balance;
     private AccountStatus status;
-    private Boolean isLocked;
+    private Boolean locked;
 }

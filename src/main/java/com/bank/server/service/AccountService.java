@@ -1,6 +1,7 @@
 package com.bank.server.service;
 
 import lombok.extern.slf4j.Slf4j;
+import com.bank.server.enums.LogType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -46,10 +47,10 @@ public class AccountService {
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ViewAccountResponseDTO getAccountForAccountId(String customerId, String accountId) {
+    public ViewAccountResponseDTO getAccountForAccountId(String customerId, String accountNumber) {
         Account account = accountRepository.getAccountsWithProductByCustomerId(customerId)
                 .stream()
-                .filter(acc -> acc.getId().equals(accountId))
+                .filter(acc -> acc.getAccountNumber().equals(accountNumber))
                 .findFirst().orElse(null);
         if (account == null) {
             throw new AccountNotFoundException("ACCOUNT_NOT_FOUND","No Account found");
@@ -57,7 +58,7 @@ public class AccountService {
 
         loggerService.log(
                 "FETCH_ACCOUNT",
-                "Fetched account " + accountId,
+                "Fetched account " + accountNumber,
                 LogType.SUCCESS);
 
         ViewAccountResponseDTO accountDtos = accountMapper.toViewDto(account);
@@ -70,7 +71,7 @@ public class AccountService {
         Account account = accountMapper.toEntity(accountDTO);
         account.setBalance(BigDecimal.ZERO);
         account.setStatus(AccountStatus.ACTIVE);
-        account.setIsLocked(false);
+        account.setLocked(false);
         account.setAccountNumber(Generator.generateAccountNumber());
         account.setId(Generator.generateUuid());
         Account savedAccount = accountRepository.save(account);
@@ -115,5 +116,27 @@ public class AccountService {
         Account savedAccount = accountRepository.save(account);
 
         return accountMapper.toDto(savedAccount);
+    public Account getAccountForUpdate(String accountNumber) {
+        return accountRepository
+                .findByAccountNumberForUpdate(accountNumber)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        "ACCOUNT_NOT_FOUND",
+                        "Account not found with account number: " + accountNumber)
+                );
+    }
+    public void transferAmount(
+            Account sourceAccount,
+            Account destinationAccount,
+            BigDecimal amount)
+    {
+        BigDecimal sourceBalanceAfter = sourceAccount.getBalance().subtract(amount);
+
+        BigDecimal destinationBalanceAfter = destinationAccount.getBalance().add(amount);
+
+        sourceAccount.setBalance(sourceBalanceAfter);
+        destinationAccount.setBalance(destinationBalanceAfter);
+
+        accountRepository.save(sourceAccount);
+        accountRepository.save(destinationAccount);
     }
 }

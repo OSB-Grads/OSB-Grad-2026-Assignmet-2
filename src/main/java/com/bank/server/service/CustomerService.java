@@ -30,8 +30,6 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
     private final LoggerService loggerService;
-    private final AuthRepository authRepository;
-    private final PasswordEncoder passwordencoder;
 
     public CustomerDTO createCustomer(CustomerDTO dto) {
 
@@ -103,6 +101,7 @@ public class CustomerService {
         Auth auth = authRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomerNotFoundException("CUTSOMER_NOT_FOUND","Customer not found"));
         String customerId = auth.getId();
+    public CustomerDTO getMyProfile(String customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
         loggerService.log(
@@ -112,10 +111,7 @@ public class CustomerService {
         );
         return customerMapper.toDto(customer);
     }
-    public CustomerDTO updateMyProfile(String username, UpdateCustomerDTO updateDto) {
-        Auth auth = authRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
-        String customerId = auth.getId();
+    public CustomerDTO updateMyProfile(String customerId, UpdateCustomerDTO updateDto) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
         if(updateDto.getEmail()!=null) {

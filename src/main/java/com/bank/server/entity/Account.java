@@ -15,6 +15,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,8 +25,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "accounts")
+@Builder
 public class Account {
-
     @Id
     private String id;
 
@@ -44,7 +45,7 @@ public class Account {
     private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(nullable = false)
-    private Boolean isLocked = false;
+    private Boolean locked = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -56,12 +57,14 @@ public class Account {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "transfers_enabled", nullable = false)
+    private Boolean transfersEnabled = true;
+
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
         updatedAt=LocalDateTime.now();
     }
-
     @PreUpdate
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
