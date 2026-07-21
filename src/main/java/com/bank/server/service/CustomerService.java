@@ -66,7 +66,7 @@ public class CustomerService {
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public CustomerDTO getCustomerById(String id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException("CUSTOMER_NOT_FOUND","Customer not found"));
         loggerService.log(
                 "CUSTOMER_FETCH",
                 "Customer fetched successfully with ID: " + id,
@@ -89,7 +89,7 @@ public class CustomerService {
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteCustomer(String id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException("CUSTOMER_NOT_FOUND","Customer not found"));
         customerRepository.delete(customer);
         loggerService.log(
                 "CUSTOMER_DELETE",
@@ -97,6 +97,10 @@ public class CustomerService {
                 LogType.SUCCESS
         );
     }
+    public CustomerDTO getMyProfile(String username) {
+        Auth auth = authRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomerNotFoundException("CUTSOMER_NOT_FOUND","Customer not found"));
+        String customerId = auth.getId();
     public CustomerDTO getMyProfile(String customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
