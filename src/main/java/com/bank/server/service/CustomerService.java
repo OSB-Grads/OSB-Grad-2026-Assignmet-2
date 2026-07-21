@@ -66,7 +66,9 @@ public class CustomerService {
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public CustomerDTO getCustomerById(String id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "CUSTOMER_FETCH",
+                        "Customer not found"));
         loggerService.log(
                 "CUSTOMER_FETCH",
                 "Customer fetched successfully with ID: " + id,
@@ -89,7 +91,9 @@ public class CustomerService {
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteCustomer(String id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "CUSTOMER_DELETE",
+                        "Customer not found"));
         customerRepository.delete(customer);
         loggerService.log(
                 "CUSTOMER_DELETE",
@@ -99,7 +103,9 @@ public class CustomerService {
     }
     public CustomerDTO getMyProfile(String customerId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "CUSTOMER_FETCH",
+                        "Customer not found"));
         loggerService.log(
                 "CUSTOMER_FETCH",
                 "Customer fetched successfully",
@@ -109,7 +115,9 @@ public class CustomerService {
     }
     public CustomerDTO updateMyProfile(String customerId, UpdateCustomerDTO updateDto) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "CUSTOMER_UPDATE",
+                        "Customer not found"));
         if(updateDto.getEmail()!=null) {
             customer.setEmail(updateDto.getEmail());
         }
