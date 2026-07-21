@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 public class InboxResponseDTO {
     private String id;
+    private String transactionId;
     private InboxStatus status;
     private String message;
 }

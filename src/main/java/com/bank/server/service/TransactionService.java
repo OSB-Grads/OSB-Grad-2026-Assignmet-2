@@ -1,12 +1,15 @@
 package com.bank.server.service;
 
 import com.bank.server.dto.TransactionDTO;
+import com.bank.server.dto.response.PaymentResponseDTO;
 import com.bank.server.entity.Account;
 import com.bank.server.entity.Customer;
+import com.bank.server.entity.Inbox;
 import com.bank.server.entity.Transaction;
 import com.bank.server.enums.TransactionStatus;
 import com.bank.server.exception.AccountNotFoundException;
 import com.bank.server.exception.CustomerNotFoundException;
+import com.bank.server.exception.InboxNotFoundException;
 import com.bank.server.exception.TransactionNotFoundException;
 import com.bank.server.mapper.TransactionMapper;
 import com.bank.server.repository.AccountRepository;
@@ -106,5 +109,17 @@ public class TransactionService {
         Transaction updatedTransaction = transactionRepository.save(transaction);
 
         return transactionMapper.toDto(updatedTransaction);
+    }
+
+    public PaymentResponseDTO getTransactionStatus(String transactionId) {
+        Transaction transaction =transactionRepository.findById(transactionId)
+                .orElseThrow(()-> new TransactionNotFoundException("TRANSACTION_NOT_FOUND", "Transaction not found for id "+transactionId));
+
+
+        return PaymentResponseDTO.builder()
+                .id(transaction.getId())
+                .status(transaction.getStatus())
+                .message("Payment status fetched successfully.")
+                .build();
     }
 }

@@ -25,13 +25,4 @@ public class PaymentController {
         InboxResponseDTO withdrawDTO = paymentOrchestrator.processWithdrawalRequest(withdrawRequestDTO);
         return new ResponseEntity<>(withdrawDTO,HttpStatus.CREATED);
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<PaymentResponseDTO> getPaymentStatus(
-            @PathVariable("id") String entryId) {
-
-        PaymentResponseDTO response = inboxService.getInboxStatus(entryId);
-
-        return ResponseEntity.ok(response);
-    }
 }

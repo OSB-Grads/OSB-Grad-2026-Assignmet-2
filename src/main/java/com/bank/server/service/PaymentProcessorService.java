@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -76,16 +77,22 @@ public class PaymentProcessorService {
     }
 
     @Transactional
-    public void processWithdrawal(InboxDTO inbox) {
-        log.info("Processing withdrawal for account {}", inbox.getPayload().get("targetAccountId"));
+    public void processWithdrawalResponse(InboxDTO inbox) {
+
+        log.info("Processing withdrawal for transaction {}", inbox.getTransactionId());
 
         String transactionId = inbox.getTransactionId();
-        String accountId = inbox.getPayload().get("targetAccountId").toString();
-        BigDecimal amount = new BigDecimal(inbox.getPayload().get("amount").toString());
+        TransactionDTO transaction = transactionService.getTransactionById(transactionId);
 
-        boolean success = realWorldBankService.withdraw(inbox);
+        String accountId = transaction.getFromAccountId();
+        BigDecimal amount = transaction.getAmount();
+        Map<String,Object> payload = inbox.getPayload();
 
-        if(success)
+        log.info("Processing withdrawal for account {}", accountId);
+
+        Boolean success = (Boolean) payload.get("success");
+
+        if(Boolean.TRUE.equals(success))
         {
             transactionService.updateTransaction(transactionId, TransactionStatus.COMPLETED);
             log.info("Withdrawal of {} processed successfully for account {}",amount,accountId);
@@ -96,8 +103,8 @@ public class PaymentProcessorService {
                             " from account " + accountId,
                     LogType.SUCCESS);
 
-            inboxService.deleteById(inbox.getId());
         }else{
+            log.info("Withdrawal failed. Refunding {} to account {}", amount, accountId);
             AccountDTO accountDTO = accountService.creditAmount(accountId,amount);
 
             transactionService.updateTransaction(transactionId,TransactionStatus.FAILED);
@@ -107,8 +114,7 @@ public class PaymentProcessorService {
                              ". Amount refunded: " + amount,
                      LogType.FAILURE
              );
-
-             inboxService.deleteById(inbox.getId());
         }
+        inboxService.deleteById(inbox.getId());
     }
 }

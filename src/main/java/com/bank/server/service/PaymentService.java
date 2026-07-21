@@ -24,7 +24,7 @@ public class PaymentService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public void processWithdrawals(){
-        processPayments(inboxService.findPendingWithdrawals());
+        processPayments(inboxService.findPendingWithdrawalResponses());
     }
 
     private void processPayments(List<InboxDTO> pendingEntries){
@@ -38,7 +38,7 @@ public class PaymentService {
                         break;
 
                     case WITHDRAWAL_RESPONSE:
-                        paymentProcessorService.processWithdrawal(entry);
+                        paymentProcessorService.processWithdrawalResponse(entry);
                         break;
 
                     default:
