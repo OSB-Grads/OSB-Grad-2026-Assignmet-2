@@ -62,7 +62,7 @@ public class AuthService {
         customerService.createCustomer(customerDTO);
         return authMapper.toDto(savedAuth);
     }
-    public LoginResponse login(LoginRequestDTO request) throws UserNotFoundException {
+    public LoginResponse login(LoginRequestDTO request)  {
         Authentication authentication =
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
@@ -72,8 +72,12 @@ public class AuthService {
                 );
         CustomUserDetails userDetails =
                 (CustomUserDetails) authentication.getPrincipal();
-        assert userDetails != null;
         String token = jwtService.generateToken(userDetails);
+
+        Role role = userDetails.getAuthorities().stream().findFirst()
+                .map(authority -> Role.valueOf(authority.getAuthority().replace("ROLE_", "")))
+                .orElseThrow(() -> new IllegalStateException("User role not found"));
+
         loggerService.log(
                 "AUTH_LOGIN",
                 "User logged in successfully with username: "
@@ -81,7 +85,10 @@ public class AuthService {
                 LogType.SUCCESS
         );
         return LoginResponse.builder()
-                .token(token)
+                .accessToken(token)
+                .tokenType("Bearer")
+                .expiresIn(jwtService.getExpirationInSeconds())
+                .role(role)
                 .build();
     }
 }

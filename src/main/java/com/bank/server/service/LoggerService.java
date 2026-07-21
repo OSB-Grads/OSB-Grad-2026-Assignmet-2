@@ -33,7 +33,6 @@ public class LoggerService {
         }
 
         LogEntry logEntry = new LogEntry();
-
         logEntry.setId(UUID.randomUUID().toString());
         logEntry.setAction(action);
         logEntry.setDetails(message);
