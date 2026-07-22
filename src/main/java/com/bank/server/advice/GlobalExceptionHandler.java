@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import lombok.extern.slf4j.Slf4j;
 import com.bank.server.dto.response.LogResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @Slf4j
 @RestControllerAdvice
@@ -270,4 +271,37 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(error);
     }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ErrorResponse> handleValidation(
+                        MethodArgumentNotValidException ex) {
+
+                String message = ex.getBindingResult()
+                                .getFieldError()
+                                .getDefaultMessage();
+
+                return ResponseEntity.badRequest().body(
+                                ErrorResponse.builder()
+                                                .code("VALIDATION_ERROR")
+                                                .message(message)
+                                                .build());
+        }
+
+    @ExceptionHandler(InboxNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleInboxNotFound(InboxNotFoundException ex){
+        log.warn("{}",ex.getMessage());
+
+        loggerService.log(
+                ex.getCode(),
+                ex.getMessage(),
+                LogType.ERROR
+        );
+
+        ErrorResponse error = ErrorResponse.builder()
+                .code(ex.getCode())
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
 }

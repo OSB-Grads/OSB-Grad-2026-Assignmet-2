@@ -174,7 +174,7 @@ public class LoanService {
                     .customer(loan.getCustomer())
                     .product(loanProduct)
                     .balance(loan.getRequestedAmount())
-                    .isLocked(false)
+                    .locked(false)
                     .transfersEnabled(false)
                     .status(AccountStatus.ACTIVE)
                     .build();

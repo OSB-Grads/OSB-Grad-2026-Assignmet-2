@@ -1,13 +1,14 @@
 package com.bank.server.exception;
+
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Getter
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class CustomerNotFoundException extends RuntimeException{
+@ResponseStatus(value = HttpStatus.NOT_FOUND)
+public class InboxNotFoundException extends RuntimeException {
     private final String code;
-    public CustomerNotFoundException(String code,String message) {
+    public InboxNotFoundException(String code, String message) {
         super(message);
         this.code = code;
     }

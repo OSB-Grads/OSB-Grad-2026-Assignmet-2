@@ -50,8 +50,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public boolean isTokenValid(String token,
-                                UserDetails userDetails) {
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         String customerId = extractCustomerId(token);
         return customerId.equals(((CustomUserDetails) userDetails).getCustomerId())
                 && !extractExpiration(token).before(new Date());
