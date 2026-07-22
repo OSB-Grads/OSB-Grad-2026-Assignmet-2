@@ -1,5 +1,6 @@
 package com.bank.server.service;
 
+import lombok.extern.slf4j.Slf4j;
 import com.bank.server.enums.LogType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.dao.DataAccessException;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AccountService {
 
     private final AccountRepository accountRepository;
@@ -81,6 +83,39 @@ public class AccountService {
         return accountMapper.toDto(savedAccount);
 
     }
+
+    public AccountDTO reserveAmount(String accountId, BigDecimal amount) {
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        "ACCOUNT_NOT_FOUND",
+                        "Account not found for id " + accountId));
+
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientBalanceException(
+                    "INSUFFICIENT_BALANCE",
+                    "Insufficient balance");
+        }
+
+        account.setBalance(account.getBalance().subtract(amount));
+
+        Account savedAccount = accountRepository.save(account);
+
+        return accountMapper.toDto(savedAccount);
+    }
+
+    public AccountDTO creditAmount(String accountId, BigDecimal amount)
+    {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        "ACCOUNT_NOT_FOUND",
+                        "Account not found for id " + accountId));
+
+        account.setBalance(account.getBalance().add(amount));
+
+        Account savedAccount = accountRepository.save(account);
+
+        return accountMapper.toDto(savedAccount);
     public Account getAccountForUpdate(String accountNumber) {
         return accountRepository
                 .findByAccountNumberForUpdate(accountNumber)
