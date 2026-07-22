@@ -3,6 +3,7 @@ package com.bank.server.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.bank.server.enums.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +23,10 @@ public class Transaction {
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private TransactionStatus status;
+
     private String description;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
