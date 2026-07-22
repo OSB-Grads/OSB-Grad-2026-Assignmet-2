@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.bank.server.enums.TransactionStatus.COMPLETED;
+
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
@@ -117,14 +119,16 @@ public class TransactionService {
     }
 
     public PaymentResponseDTO getTransactionStatus(String transactionId) {
-        Transaction transaction =transactionRepository.findById(transactionId)
-                .orElseThrow(()-> new TransactionNotFoundException("TRANSACTION_NOT_FOUND", "Transaction not found for id "+transactionId));
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new TransactionNotFoundException("TRANSACTION_NOT_FOUND", "Transaction not found for id " + transactionId));
 
 
         return PaymentResponseDTO.builder()
                 .id(transaction.getId())
                 .status(transaction.getStatus())
-                .message("Payment status fetched successfully.")
+                .message("Payment status fetched successfully.").build();
+    }
+
     public Transaction createTransferTransaction(
             Account sourceAccount,
             Account destinationAccount,
@@ -137,7 +141,7 @@ public class TransactionService {
 
         transaction.setTransactionType("TRANSFER");
         transaction.setAmount(amount);
-        transaction.setStatus("COMPLETED");
+        transaction.setStatus(COMPLETED);
 
         transaction.setDescription(
                 "Internal transfer reference: " + reference

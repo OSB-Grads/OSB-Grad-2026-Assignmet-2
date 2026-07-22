@@ -2,12 +2,14 @@ package com.bank.server.service;
 
 import com.bank.server.dto.CustomerDTO;
 import com.bank.server.dto.UpdateCustomerDTO;
+import com.bank.server.entity.Auth;
 import com.bank.server.entity.Customer;
 import com.bank.server.enums.LogType;
 import com.bank.server.exception.CustomerNotFoundException;
 import com.bank.server.exception.EmailAlreadyExistsException;
 import com.bank.server.exception.UnderAgeException;
 import com.bank.server.mapper.CustomerMapper;
+import com.bank.server.repository.AuthRepository;
 import com.bank.server.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -91,10 +93,7 @@ public class CustomerService {
 
         );
     }
-    public CustomerDTO getMyProfile(String username) {
-        Auth auth = authRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomerNotFoundException("CUTSOMER_NOT_FOUND","Customer not found"));
-        String customerId = auth.getId();
+
     public CustomerDTO getMyProfile(String customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException(

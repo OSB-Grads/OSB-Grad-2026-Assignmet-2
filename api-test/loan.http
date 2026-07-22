@@ -1,0 +1,15 @@
+
+###### Get Customer Loans
+GET http://localhost:8080/api/v1/loans
+#
+####
+#
+#### Get Pending Loans
+GET http://localhost:8080/api/v1/loans/pending
+#
+####
+#
+#### Process Pending Loans
+POST http://localhost:8080/api/v1/loans/process
+#
+####

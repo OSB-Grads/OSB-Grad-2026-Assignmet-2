@@ -2,17 +2,14 @@ package com.bank.server.service;
 
 import lombok.extern.slf4j.Slf4j;
 import com.bank.server.enums.LogType;
+import com.bank.server.exception.InsufficientBalanceException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.bank.server.dto.AccountDTO;
 import com.bank.server.dto.ViewAccountResponseDTO;
 import com.bank.server.entity.Account;
-import com.bank.server.entity.Customer;
-import com.bank.server.entity.Product;
 import com.bank.server.enums.AccountStatus;
-import com.bank.server.enums.LogType;
 import com.bank.server.exception.AccountNotFoundException;
 import com.bank.server.exception.ProductNotFoundException;
 import com.bank.server.mapper.AccountMapper;
@@ -23,7 +20,9 @@ import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
+
+import static java.util.spi.ToolProvider.findFirst;
+
 
 @Service
 @RequiredArgsConstructor
@@ -49,20 +48,31 @@ public class AccountService {
         return accounts.stream().map(accountMapper::toViewDto).toList();
     }
 
+
     @PreAuthorize("hasRole('CUSTOMER')")
     public ViewAccountResponseDTO getAccountForAccountNumber(String customerId, String accountNumber) {
-        Account account=accountRepository.findAll().stream().filter(acc->acc.getAccountNumber().equals(accountNumber)).findFirst().orElse(null);
+
+        Account account = accountRepository.findAll().stream()
+                .filter(acc ->
+                        acc.getAccountNumber().equals(accountNumber)
+                                && acc.getCustomer().getId().equals(customerId)
+                )
+                .findFirst()
+                .orElse(null);
+
         if (account == null) {
-            throw new AccountNotFoundException("ACCOUNT_NOT_FOUND","No Account found");
+            throw new AccountNotFoundException(
+                    "ACCOUNT_NOT_FOUND",
+                    "No Account found"
+            );
         }
-        
         loggerService.log(
                 "FETCH_ACCOUNT",
                 "Fetched account " + accountNumber,
                 LogType.SUCCESS);
 
-        ViewAccountResponseDTO accountDtos = accountMapper.toViewDto(account);
-        return accountDtos;
+        return accountMapper.toViewDto(account);
+
     }
 
     @Transactional
@@ -110,18 +120,15 @@ public class AccountService {
         return accountMapper.toDto(savedAccount);
     }
 
-    public AccountDTO creditAmount(String accountId, BigDecimal amount)
-    {
+    public AccountDTO creditAmount(String accountId, BigDecimal amount) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFoundException(
                         "ACCOUNT_NOT_FOUND",
                         "Account not found for id " + accountId));
-
         account.setBalance(account.getBalance().add(amount));
-
         Account savedAccount = accountRepository.save(account);
-
         return accountMapper.toDto(savedAccount);
+    }
     public Account getAccountForUpdate(String accountNumber) {
         return accountRepository
                 .findByAccountNumberForUpdate(accountNumber)

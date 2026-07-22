@@ -1,11 +1,12 @@
 package com.bank.server.service;
 
+import com.bank.server.entity.Customer;
 import com.bank.server.entity.LogEntry;
 import com.bank.server.enums.LogType;
+import com.bank.server.repository.CustomerRepository;
 import com.bank.server.repository.LogRepository;
 import com.bank.server.utils.Generator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.bank.server.exception.IllegalArgumentException;
@@ -17,6 +18,7 @@ import com.bank.server.utils.AuthenticationUtil;
 @Service
 public class LoggerService {
 
+    private final CustomerRepository customerRepository;
     private final LogRepository logEntryRepository;
     @Transactional
     public void log(String action,
@@ -38,7 +40,11 @@ public class LoggerService {
         LogEntry logEntry = new LogEntry();
         logEntry.setId(UUID.randomUUID().toString());
         logEntry.setId(Generator.generateUuid());
-        logEntry.setCustomer(AuthenticationUtil.getCurrentCustomerId());
+
+        String customerId = AuthenticationUtil.getCurrentCustomerId();
+        Customer customer = customerRepository.findById(customerId).orElse(null);
+
+        logEntry.setCustomer(customer);
         logEntry.setAction(action);
         logEntry.setDetails(message);
         logEntry.setStatus(

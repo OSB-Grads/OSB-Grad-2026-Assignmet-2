@@ -79,12 +79,12 @@ public class AuthService {
                 .map(authority -> Role.valueOf(authority.getAuthority().replace("ROLE_", "")))
                 .orElseThrow(() -> new IllegalStateException("User role not found"));
 
-        loggerService.log(
-                "AUTH_LOGIN",
-                "User logged in successfully with username: "
-                        + userDetails.getUsername(),
-                LogType.SUCCESS
-        );
+//        loggerService.log(
+//                "AUTH_LOGIN",
+//                "User logged in successfully with username: "
+//                        + userDetails.getUsername(),
+//                LogType.SUCCESS
+//        );
         return LoginResponse.builder()
                 .accessToken(token)
                 .tokenType("Bearer")

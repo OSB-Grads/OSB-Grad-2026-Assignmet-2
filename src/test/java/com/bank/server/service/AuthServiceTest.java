@@ -166,7 +166,7 @@ class AuthServiceTest {
         LoginResponse response = authService.login(loginRequest);
 
         assertNotNull(response);
-        assertEquals(JWT_TOKEN, response.getToken());
+        assertEquals(JWT_TOKEN, response.getAccessToken());
 
         ArgumentCaptor<UsernamePasswordAuthenticationToken> captor = ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
 
