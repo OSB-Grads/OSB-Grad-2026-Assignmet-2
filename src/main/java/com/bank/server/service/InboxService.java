@@ -15,8 +15,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class InboxService {
         String payloadJson;
         try{
             payloadJson = objectMapper.writeValueAsString(payload);
-        }catch(JsonProcessingException e){
+        }catch(JacksonException e){
             throw new RuntimeException("Failed to serialize withdrawal payload",e);
         }
 
