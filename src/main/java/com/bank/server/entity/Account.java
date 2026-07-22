@@ -52,7 +52,7 @@ public class Account {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AccountStatus status=AccountStatus.ACTIVE ;
-
+ 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
