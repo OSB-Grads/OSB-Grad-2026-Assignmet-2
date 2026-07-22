@@ -238,7 +238,7 @@ class TransactionServiceTest {
         );
 
         assertEquals(
-                "COMPLETED",
+                TransactionStatus.COMPLETED,
                 savedTransaction.getStatus()
         );
 
