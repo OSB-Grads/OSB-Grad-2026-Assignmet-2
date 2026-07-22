@@ -10,13 +10,13 @@ import com.bank.server.enums.LogType;
 import com.bank.server.exception.InboxNotFoundException;
 import com.bank.server.mapper.InboxMapper;
 import com.bank.server.repository.InboxRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -42,7 +42,7 @@ public class InboxServiceTest {
     private InboxService inboxService;
 
     @Test
-    void enqueueWithdrawal_ShouldQueueWithdrawalSuccessfully() throws JsonProcessingException {
+    void enqueueWithdrawal_ShouldQueueWithdrawalSuccessfully() throws JacksonException {
         WithdrawRequestDTO request =
                 WithdrawRequestDTO.builder()
                         .targetAccountId("ACC123")
@@ -105,7 +105,7 @@ public class InboxServiceTest {
         String nationalId = "987654321";
 
         when(objectMapper.writeValueAsString(any()))
-                .thenThrow(new JsonProcessingException("Serialization failed") {});
+                .thenThrow(new JacksonException("Serialization failed") {});
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
