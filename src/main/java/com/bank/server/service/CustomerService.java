@@ -2,25 +2,20 @@ package com.bank.server.service;
 
 import com.bank.server.dto.CustomerDTO;
 import com.bank.server.dto.UpdateCustomerDTO;
-import com.bank.server.entity.Auth;
 import com.bank.server.entity.Customer;
 import com.bank.server.enums.LogType;
 import com.bank.server.exception.CustomerNotFoundException;
 import com.bank.server.exception.EmailAlreadyExistsException;
 import com.bank.server.exception.UnderAgeException;
-import com.bank.server.exception.UsernameAlreadyExistsException;
 import com.bank.server.mapper.CustomerMapper;
-import com.bank.server.repository.AuthRepository;
 import com.bank.server.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-//import com.bank.server.enums.LogType;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.time.Period;
 
 @Service
@@ -66,11 +61,14 @@ public class CustomerService {
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public CustomerDTO getCustomerById(String id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new CustomerNotFoundException("CUSTOMER_NOT_FOUND","Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "CUSTOMER_FETCH",
+                        "Customer not found"));
         loggerService.log(
                 "CUSTOMER_FETCH",
                 "Customer fetched successfully with ID: " + id,
                 LogType.SUCCESS
+
         );
         return customerMapper.toDto(customer);
     }
@@ -89,12 +87,16 @@ public class CustomerService {
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteCustomer(String id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new CustomerNotFoundException("CUSTOMER_NOT_FOUND","Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "CUSTOMER_DELETE",
+                        "Customer not found"));
+
         customerRepository.delete(customer);
         loggerService.log(
                 "CUSTOMER_DELETE",
                 "Customer deleted successfully with ID: " + id,
                 LogType.SUCCESS
+
         );
     }
     public CustomerDTO getMyProfile(String username) {
@@ -103,7 +105,9 @@ public class CustomerService {
         String customerId = auth.getId();
     public CustomerDTO getMyProfile(String customerId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "CUSTOMER_FETCH",
+                        "Customer not found"));
         loggerService.log(
                 "CUSTOMER_FETCH",
                 "Customer fetched successfully",
@@ -113,7 +117,9 @@ public class CustomerService {
     }
     public CustomerDTO updateMyProfile(String customerId, UpdateCustomerDTO updateDto) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "CUSTOMER_UPDATE",
+                        "Customer not found"));
         if(updateDto.getEmail()!=null) {
             customer.setEmail(updateDto.getEmail());
         }
