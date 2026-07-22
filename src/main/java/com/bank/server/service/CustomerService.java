@@ -2,25 +2,20 @@ package com.bank.server.service;
 
 import com.bank.server.dto.CustomerDTO;
 import com.bank.server.dto.UpdateCustomerDTO;
-import com.bank.server.entity.Auth;
 import com.bank.server.entity.Customer;
 import com.bank.server.enums.LogType;
 import com.bank.server.exception.CustomerNotFoundException;
 import com.bank.server.exception.EmailAlreadyExistsException;
 import com.bank.server.exception.UnderAgeException;
-import com.bank.server.exception.UsernameAlreadyExistsException;
 import com.bank.server.mapper.CustomerMapper;
-import com.bank.server.repository.AuthRepository;
 import com.bank.server.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-//import com.bank.server.enums.LogType;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.time.Period;
 
 @Service
@@ -73,6 +68,7 @@ public class CustomerService {
                 "CUSTOMER_FETCH",
                 "Customer fetched successfully with ID: " + id,
                 LogType.SUCCESS
+
         );
         return customerMapper.toDto(customer);
     }
@@ -94,13 +90,19 @@ public class CustomerService {
                 .orElseThrow(() -> new CustomerNotFoundException(
                         "CUSTOMER_DELETE",
                         "Customer not found"));
+
         customerRepository.delete(customer);
         loggerService.log(
                 "CUSTOMER_DELETE",
                 "Customer deleted successfully with ID: " + id,
                 LogType.SUCCESS
+
         );
     }
+    public CustomerDTO getMyProfile(String username) {
+        Auth auth = authRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomerNotFoundException("CUTSOMER_NOT_FOUND","Customer not found"));
+        String customerId = auth.getId();
     public CustomerDTO getMyProfile(String customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException(

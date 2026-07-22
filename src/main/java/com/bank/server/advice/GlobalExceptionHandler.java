@@ -252,4 +252,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(InboxNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleInboxNotFound(InboxNotFoundException ex){
+        log.warn("{}",ex.getMessage());
+
+        loggerService.log(
+                ex.getCode(),
+                ex.getMessage(),
+                LogType.ERROR
+        );
+
+        ErrorResponse error = ErrorResponse.builder()
+                .code(ex.getCode())
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
 }

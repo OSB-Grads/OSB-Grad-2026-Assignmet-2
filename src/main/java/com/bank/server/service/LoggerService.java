@@ -3,6 +3,7 @@ package com.bank.server.service;
 import com.bank.server.entity.LogEntry;
 import com.bank.server.enums.LogType;
 import com.bank.server.repository.LogRepository;
+import com.bank.server.utils.Generator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class LoggerService {
 
         LogEntry logEntry = new LogEntry();
 
-        logEntry.setId(UUID.randomUUID().toString());
+        logEntry.setId(Generator.generateUuid());
         logEntry.setAction(action);
         logEntry.setDetails(message);
         logEntry.setStatus(
