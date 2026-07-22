@@ -41,16 +41,18 @@ public class Account {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @Builder.Default
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean locked = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AccountStatus status=AccountStatus.ACTIVE ;
-
+ 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

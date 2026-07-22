@@ -26,12 +26,12 @@ public class AccountController {
     private final TransactionService transactionService;
 
     @PostMapping
-    public ResponseEntity<AccountDTO> createAccount(Authentication authentication ,@Valid @RequestBody AccountDTO accountDto) {
+    public ResponseEntity<String> createAccount(Authentication authentication ,@Valid @RequestBody AccountDTO accountDto) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         String customerId = user.getCustomerId();
         accountDto.setCustomerId(customerId);
         AccountDTO account = accountsService.createAccount(accountDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(account);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Account Created Successfully");
     }
 
     @GetMapping
@@ -49,7 +49,7 @@ public class AccountController {
             @PathVariable("accountNumber") String accountNumber) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         String customerId = user.getCustomerId();
-        ViewAccountResponseDTO account = accountsService.getAccountForAccountId(customerId, accountNumber);
+        ViewAccountResponseDTO account = accountsService.getAccountForAccountNumber(customerId, accountNumber);
         List<TransactionDTO> transactions = transactionService.getTransactionsByAccountNumber(accountNumber);
         AccountTransactionDto accountTransactionDto = new AccountTransactionDto(account, transactions);
         return ResponseEntity.ok(accountTransactionDto);
