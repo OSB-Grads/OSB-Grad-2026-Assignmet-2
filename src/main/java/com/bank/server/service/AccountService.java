@@ -1,5 +1,6 @@
 package com.bank.server.service;
 
+import lombok.extern.slf4j.Slf4j;
 import com.bank.server.enums.LogType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.dao.DataAccessException;
@@ -13,8 +14,10 @@ import com.bank.server.entity.Product;
 import com.bank.server.enums.AccountStatus;
 import com.bank.server.enums.LogType;
 import com.bank.server.exception.AccountNotFoundException;
+import com.bank.server.exception.ProductNotFoundException;
 import com.bank.server.mapper.AccountMapper;
 import com.bank.server.repository.AccountRepository;
+import com.bank.server.repository.ProductRepository;
 import com.bank.server.utils.Generator;
 import lombok.RequiredArgsConstructor;
 
@@ -25,11 +28,13 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AccountService {
 
     private final AccountRepository accountRepository;
     private final AccountMapper accountMapper;
     private final LoggerService loggerService;
+    private final ProductRepository productRepository;
 
     @PreAuthorize("hasRole('CUSTOMER')")
     public List<ViewAccountResponseDTO> getAllAccountsForCustomer(String customerId) {
@@ -45,15 +50,12 @@ public class AccountService {
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ViewAccountResponseDTO getAccountForAccountId(String customerId, String accountNumber) {
-        Account account = accountRepository.getAccountsWithProductByCustomerId(customerId)
-                .stream()
-                .filter(acc -> acc.getAccountNumber().equals(accountNumber))
-                .findFirst().orElse(null);
+    public ViewAccountResponseDTO getAccountForAccountNumber(String customerId, String accountNumber) {
+        Account account=accountRepository.findAll().stream().filter(acc->acc.getAccountNumber().equals(accountNumber)).findFirst().orElse(null);
         if (account == null) {
             throw new AccountNotFoundException("ACCOUNT_NOT_FOUND","No Account found");
         }
-
+        
         loggerService.log(
                 "FETCH_ACCOUNT",
                 "Fetched account " + accountNumber,
@@ -66,10 +68,16 @@ public class AccountService {
     @Transactional
     @PreAuthorize("hasRole('CUSTOMER')")
     public AccountDTO createAccount(AccountDTO accountDTO) {
+        productRepository.findById(accountDTO.getProductId())
+        .orElseThrow(() ->
+            new ProductNotFoundException(
+                "PRODUCT_NOT_FOUND",
+                "Product not found"));
         Account account = accountMapper.toEntity(accountDTO);
         account.setBalance(BigDecimal.ZERO);
         account.setStatus(AccountStatus.ACTIVE);
         account.setLocked(false);
+        account.setTransfersEnabled(true);
         account.setAccountNumber(Generator.generateAccountNumber());
         account.setId(Generator.generateUuid());
         Account savedAccount = accountRepository.save(account);
@@ -81,6 +89,39 @@ public class AccountService {
         return accountMapper.toDto(savedAccount);
 
     }
+
+    public AccountDTO reserveAmount(String accountId, BigDecimal amount) {
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        "ACCOUNT_NOT_FOUND",
+                        "Account not found for id " + accountId));
+
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientBalanceException(
+                    "INSUFFICIENT_BALANCE",
+                    "Insufficient balance");
+        }
+
+        account.setBalance(account.getBalance().subtract(amount));
+
+        Account savedAccount = accountRepository.save(account);
+
+        return accountMapper.toDto(savedAccount);
+    }
+
+    public AccountDTO creditAmount(String accountId, BigDecimal amount)
+    {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountNotFoundException(
+                        "ACCOUNT_NOT_FOUND",
+                        "Account not found for id " + accountId));
+
+        account.setBalance(account.getBalance().add(amount));
+
+        Account savedAccount = accountRepository.save(account);
+
+        return accountMapper.toDto(savedAccount);
     public Account getAccountForUpdate(String accountNumber) {
         return accountRepository
                 .findByAccountNumberForUpdate(accountNumber)

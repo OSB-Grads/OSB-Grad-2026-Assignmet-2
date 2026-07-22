@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.time.Period;
@@ -59,6 +60,7 @@ public class CustomerService {
                 "CUSTOMER_FETCH",
                 "Customer fetched successfully with ID: " + id,
                 LogType.SUCCESS
+
         );
         return customerMapper.toDto(customer);
     }
@@ -80,17 +82,23 @@ public class CustomerService {
                 .orElseThrow(() -> new CustomerNotFoundException(
                         "CUSTOMER_DELETE",
                         "Customer not found"));
+
         customerRepository.delete(customer);
         loggerService.log(
                 "CUSTOMER_DELETE",
                 "Customer deleted successfully with ID: " + id,
                 LogType.SUCCESS
+
         );
     }
+    public CustomerDTO getMyProfile(String username) {
+        Auth auth = authRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomerNotFoundException("CUTSOMER_NOT_FOUND","Customer not found"));
+        String customerId = auth.getId();
     public CustomerDTO getMyProfile(String customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException(
-                        "CUSTOMER_UPDATE",
+                        "CUSTOMER_FETCH",
                         "Customer not found"));
         loggerService.log(
                 "CUSTOMER_FETCH",

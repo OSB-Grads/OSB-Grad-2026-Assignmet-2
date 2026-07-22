@@ -1,6 +1,7 @@
 package com.bank.server.controller;
 
 import com.bank.server.dto.TransactionDTO;
+import com.bank.server.dto.response.PaymentResponseDTO;
 import com.bank.server.service.TransactionService;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +25,20 @@ public class TransactionController {
                 transactionService.getTransactionById(id));
     }
 
-    @GetMapping("/{accountId}")
+    @GetMapping("/account/{accountId}")
     public ResponseEntity<List<TransactionDTO>> getTransactionsByAccountId(
             @PathVariable String accountId) {
 
         return ResponseEntity.ok(
                 transactionService.getTransactionsByAccountNumber(accountId));
+    }
+
+    @GetMapping("/status/{transactionId}")
+    public ResponseEntity<PaymentResponseDTO> getPaymentStatus(
+            @PathVariable("transactionId") String transactionId) {
+
+        PaymentResponseDTO response = transactionService.getTransactionStatus(transactionId);
+
+        return ResponseEntity.ok(response);
     }
 }
