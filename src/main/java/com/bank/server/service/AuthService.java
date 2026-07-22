@@ -75,10 +75,6 @@ public class AuthService {
                 (CustomUserDetails) authentication.getPrincipal();
         String token = jwtService.generateToken(userDetails);
 
-        Role role = userDetails.getAuthorities().stream().findFirst()
-                .map(authority -> Role.valueOf(authority.getAuthority().replace("ROLE_", "")))
-                .orElseThrow(() -> new IllegalStateException("User role not found"));
-
         loggerService.log(
                 "AUTH_LOGIN",
                 "User logged in successfully with username: "
@@ -86,10 +82,7 @@ public class AuthService {
                 LogType.SUCCESS
         );
         return LoginResponse.builder()
-                .accessToken(token)
-                .tokenType("Bearer")
-                .expiresIn(jwtService.getExpirationInSeconds())
-                .role(role)
+                .token(token)
                 .build();
     }
 

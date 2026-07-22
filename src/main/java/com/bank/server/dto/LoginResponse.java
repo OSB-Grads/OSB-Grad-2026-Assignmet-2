@@ -11,8 +11,5 @@ import com.bank.server.enums.Role;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginResponse {
-    private String accessToken;
-    private String tokenType;
-    private Long expiresIn;
-    private Role role;
+    private String token;
 }

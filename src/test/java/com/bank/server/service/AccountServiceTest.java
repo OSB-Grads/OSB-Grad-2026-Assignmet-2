@@ -4,9 +4,9 @@ import com.bank.server.dto.AccountDTO;
 import com.bank.server.dto.ViewAccountResponseDTO;
 import com.bank.server.entity.Account;
 import com.bank.server.entity.Product;
-import com.bank.server.enums.AccountStatus;
 import com.bank.server.enums.LogType;
 import com.bank.server.exception.AccountNotFoundException;
+import com.bank.server.exception.InsufficientBalanceException;
 import com.bank.server.exception.ProductNotFoundException;
 import com.bank.server.mapper.AccountMapper;
 import com.bank.server.repository.AccountRepository;
@@ -45,7 +45,7 @@ class AccountServiceTest {
     @InjectMocks
     private AccountService accountService;
 
-  
+
     @Test
     void shouldReturnAllAccountsForCustomer() {
 
@@ -61,8 +61,7 @@ class AccountServiceTest {
         when(accountMapper.toViewDto(account))
                 .thenReturn(dto);
 
-        List<ViewAccountResponseDTO> result =
-                accountService.getAllAccountsForCustomer("CUST001");
+        List<ViewAccountResponseDTO> result = accountService.getAllAccountsForCustomer("CUST001");
 
         assertEquals(1, result.size());
         assertEquals("ACC001", result.get(0).getAccountNumber());
@@ -87,8 +86,7 @@ class AccountServiceTest {
 
         assertThrows(
                 AccountNotFoundException.class,
-                () -> accountService.getAllAccountsForCustomer("CUST001")
-        );
+                () -> accountService.getAllAccountsForCustomer("CUST001"));
 
         verify(loggerService, never())
                 .log(any(), any(), any());
@@ -109,15 +107,18 @@ class AccountServiceTest {
         when(accountMapper.toViewDto(account))
                 .thenReturn(dto);
 
-        ViewAccountResponseDTO result =
-                accountService.getAccountForAccountNumber(
-                        "CUST001",
-                        "ACC001"
-                );
+        ViewAccountResponseDTO result = accountService.getAccountForAccountNumber(
+                "CUST001",
+                "ACC001");
 
         assertEquals("ACC001", result.getAccountNumber());
 
         verify(accountMapper).toViewDto(account);
+
+        verify(loggerService)
+                .log(eq("FETCH_ACCOUNT"),
+                        anyString(),
+                        eq(LogType.SUCCESS));
     }
 
     @Test
@@ -130,11 +131,10 @@ class AccountServiceTest {
                 AccountNotFoundException.class,
                 () -> accountService.getAccountForAccountNumber(
                         "CUST001",
-                        "ACC001")
-        );
+                        "ACC001"));
     }
 
-  
+
     @Test
     void shouldCreateAccountSuccessfully() {
 
@@ -163,8 +163,7 @@ class AccountServiceTest {
         when(accountMapper.toDto(savedAccount))
                 .thenReturn(savedDto);
 
-        AccountDTO result =
-                accountService.createAccount(dto);
+        AccountDTO result = accountService.createAccount(dto);
 
         assertEquals("ACC001",
                 result.getAccountNumber());
@@ -191,26 +190,117 @@ class AccountServiceTest {
 
         assertThrows(
                 ProductNotFoundException.class,
-                () -> accountService.createAccount(dto)
-        );
+                () -> accountService.createAccount(dto));
 
         verify(accountRepository, never())
                 .save(any());
     }
 
- 
     @Test
-    void shouldReturnAccountForUpdate() {
+    void shouldReserveAmountSuccessfully() {
 
         Account account = new Account();
+        account.setId("ACC001");
+        account.setBalance(new BigDecimal("1000"));
 
-        when(accountRepository.findByAccountNumberForUpdate("ACC001"))
+        AccountDTO dto = new AccountDTO();
+        dto.setBalance(new BigDecimal("700"));
+
+        when(accountRepository.findById("ACC001"))
                 .thenReturn(Optional.of(account));
 
-        Account result =
-                accountService.getAccountForUpdate("ACC001");
+        when(accountRepository.save(account))
+                .thenReturn(account);
 
-        assertNotNull(result);
+        when(accountMapper.toDto(account))
+                .thenReturn(dto);
+
+        AccountDTO result = accountService.reserveAmount(
+                "ACC001",
+                new BigDecimal("300"));
+
+        assertEquals(
+                new BigDecimal("700"),
+                account.getBalance());
+
+        verify(accountRepository).save(account);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenInsufficientBalance() {
+
+        Account account = new Account();
+        account.setBalance(new BigDecimal("200"));
+
+        when(accountRepository.findById("ACC001"))
+                .thenReturn(Optional.of(account));
+
+        assertThrows(
+                InsufficientBalanceException.class,
+                () -> accountService.reserveAmount(
+                        "ACC001",
+                        new BigDecimal("500")));
+
+        verify(accountRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenReserveAccountNotFound() {
+
+        when(accountRepository.findById("ACC001"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                AccountNotFoundException.class,
+                () -> accountService.reserveAmount(
+                        "ACC001",
+                        BigDecimal.TEN));
+
+        verify(accountRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldCreditAmountSuccessfully() {
+
+        Account account = new Account();
+        account.setBalance(new BigDecimal("1000"));
+
+        AccountDTO dto = new AccountDTO();
+        dto.setBalance(new BigDecimal("1500"));
+
+        when(accountRepository.findById("ACC001"))
+                .thenReturn(Optional.of(account));
+
+        when(accountRepository.save(account))
+                .thenReturn(account);
+
+        when(accountMapper.toDto(account))
+                .thenReturn(dto);
+
+        AccountDTO result = accountService.creditAmount(
+                "ACC001",
+                new BigDecimal("500"));
+
+        assertEquals(
+                new BigDecimal("1500"),
+                account.getBalance());
+
+        verify(accountRepository).save(account);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCreditAccountNotFound() {
+
+        when(accountRepository.findById("ACC001"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                AccountNotFoundException.class,
+                () -> accountService.creditAmount(
+                        "ACC001",
+                        BigDecimal.ONE));
+
+        verify(accountRepository, never()).save(any());
     }
 
     @Test
@@ -221,38 +311,29 @@ class AccountServiceTest {
 
         assertThrows(
                 AccountNotFoundException.class,
-                () -> accountService.getAccountForUpdate("ACC001")
-        );
+                () -> accountService.getAccountForUpdate("ACC001"));
     }
-
 
     @Test
     void shouldTransferAmountSuccessfully() {
 
         Account source = new Account();
+        source.setId("ACC001");
         source.setBalance(new BigDecimal("1000"));
 
         Account destination = new Account();
-        destination.setBalance(new BigDecimal("500"));
+        destination.setId("ACC002");
+        destination.setBalance(new BigDecimal("400"));
 
         accountService.transferAmount(
                 source,
                 destination,
-                new BigDecimal("200")
-        );
+                new BigDecimal("300"));
 
-        assertEquals(
-                new BigDecimal("800"),
-                source.getBalance()
-        );
-
-        assertEquals(
-                new BigDecimal("700"),
-                destination.getBalance()
-        );
+        assertEquals(new BigDecimal("700"), source.getBalance());
+        assertEquals(new BigDecimal("700"), destination.getBalance());
 
         verify(accountRepository).save(source);
         verify(accountRepository).save(destination);
     }
-
 }
