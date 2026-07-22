@@ -72,4 +72,8 @@ public class JwtService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
+
+    public long getExpirationInSeconds() {
+        return jwtExpiration / 1000;
+    }
 }

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.bank.server.exception.IllegalArgumentException;
 import java.util.UUID;
+import com.bank.server.utils.AuthenticationUtil;
+
 
 @RequiredArgsConstructor
 @Service
@@ -34,8 +36,9 @@ public class LoggerService {
         }
 
         LogEntry logEntry = new LogEntry();
-
+        logEntry.setId(UUID.randomUUID().toString());
         logEntry.setId(Generator.generateUuid());
+        logEntry.setCustomer(AuthenticationUtil.getCurrentCustomerId());
         logEntry.setAction(action);
         logEntry.setDetails(message);
         logEntry.setStatus(
