@@ -1,5 +1,6 @@
 package com.bank.server.service;
 
+import com.bank.server.exception.InsufficientBalanceException;
 import lombok.extern.slf4j.Slf4j;
 import com.bank.server.enums.LogType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -110,8 +111,7 @@ public class AccountService {
         return accountMapper.toDto(savedAccount);
     }
 
-    public AccountDTO creditAmount(String accountId, BigDecimal amount)
-    {
+    public AccountDTO creditAmount(String accountId, BigDecimal amount) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFoundException(
                         "ACCOUNT_NOT_FOUND",
@@ -122,6 +122,7 @@ public class AccountService {
         Account savedAccount = accountRepository.save(account);
 
         return accountMapper.toDto(savedAccount);
+    }
     public Account getAccountForUpdate(String accountNumber) {
         return accountRepository
                 .findByAccountNumberForUpdate(accountNumber)

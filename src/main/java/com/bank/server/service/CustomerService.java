@@ -91,10 +91,6 @@ public class CustomerService {
 
         );
     }
-    public CustomerDTO getMyProfile(String username) {
-        Auth auth = authRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomerNotFoundException("CUTSOMER_NOT_FOUND","Customer not found"));
-        String customerId = auth.getId();
     public CustomerDTO getMyProfile(String customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException(

@@ -117,14 +117,16 @@ public class TransactionService {
     }
 
     public PaymentResponseDTO getTransactionStatus(String transactionId) {
-        Transaction transaction =transactionRepository.findById(transactionId)
-                .orElseThrow(()-> new TransactionNotFoundException("TRANSACTION_NOT_FOUND", "Transaction not found for id "+transactionId));
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new TransactionNotFoundException("TRANSACTION_NOT_FOUND", "Transaction not found for id " + transactionId));
 
 
         return PaymentResponseDTO.builder()
                 .id(transaction.getId())
                 .status(transaction.getStatus())
                 .message("Payment status fetched successfully.")
+                .build();
+    }
     public Transaction createTransferTransaction(
             Account sourceAccount,
             Account destinationAccount,
@@ -137,7 +139,7 @@ public class TransactionService {
 
         transaction.setTransactionType("TRANSFER");
         transaction.setAmount(amount);
-        transaction.setStatus("COMPLETED");
+        transaction.setStatus(TransactionStatus.COMPLETED);
 
         transaction.setDescription(
                 "Internal transfer reference: " + reference

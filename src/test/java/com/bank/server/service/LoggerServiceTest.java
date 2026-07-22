@@ -1,16 +1,26 @@
 package com.bank.server.service;
 
+import com.bank.server.entity.Auth;
+import com.bank.server.entity.Customer;
 import com.bank.server.entity.LogEntry;
 import com.bank.server.enums.LogType;
+import com.bank.server.enums.Role;
 import com.bank.server.exception.IllegalArgumentException;
+import com.bank.server.repository.CustomerRepository;
 import com.bank.server.repository.LogRepository;
+import com.bank.server.security.CustomUserDetails;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,59 +28,70 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class LoggerServiceTest {
-
     @Mock
     private LogRepository logRepository;
-
+    @Mock
+    private CustomerRepository customerRepository;
     @InjectMocks
     private LoggerService loggerService;
+    @BeforeEach
+    void setUp() {
+        Auth auth = new Auth();
+        auth.setId("customer-1");
+        auth.setUsername("testuser");
+        auth.setPasswordHash("password");
+        auth.setRole(Role.CUSTOMER);
+        CustomUserDetails userDetails = new CustomUserDetails(auth);
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
 
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
     @Test
     void log_shouldSaveLogEntry_whenInputIsValid() {
-
-        // Act
+        Customer customer = new Customer();
+        customer.setId("customer-1");
+        when(customerRepository.findById("customer-1"))
+                .thenReturn(Optional.of(customer));
         loggerService.log(
                 "AUTH_LOGIN",
                 "User logged in successfully",
                 LogType.SUCCESS
         );
-
-        // Capture the object passed to repository.save()
-        // catch what was passed, check if it's correct
-        // we are getting ready with our box to catch the log entry here.
         ArgumentCaptor<LogEntry> captor = ArgumentCaptor.forClass(LogEntry.class);
-
-        // making sure that we caught the log entry
         verify(logRepository).save(captor.capture());
-        // now give me captured and saved log Entry
         LogEntry savedLog = captor.getValue();
-
-        // Assert
-        assertNotNull(savedLog.getId());  // we are making sure that it's not null
-        assertDoesNotThrow(() -> UUID.fromString(savedLog.getId())); // checks if its valid UUID format
-        // checking if these both values match
+        assertNotNull(savedLog.getId());
+        assertDoesNotThrow(() -> UUID.fromString(savedLog.getId()));
         assertEquals(
                 "AUTH_LOGIN",
                 savedLog.getAction()
         );
-        // get the same details, both should match
         assertEquals(
                 "User logged in successfully",
                 savedLog.getDetails()
         );
-        // get the status to be the same one
         assertEquals(
                 LogType.SUCCESS,
                 savedLog.getStatus()
         );
-        // get the customer
-        assertNull(savedLog.getCustomer());
+        assertNotNull(savedLog.getCustomer());
+        assertEquals("customer-1", savedLog.getCustomer().getId());
     }
-
     @Test
     void log_shouldUseSuccessStatus_whenStatusIsNull() {
-
-        // Act
+        Customer customer = new Customer();
+        customer.setId("customer-1");
+        when(customerRepository.findById("customer-1"))
+                .thenReturn(Optional.of(customer));
         loggerService.log(
                 "CUSTOMER_CREATED",
                 "Customer created successfully",
@@ -78,20 +99,15 @@ class LoggerServiceTest {
         );
         ArgumentCaptor<LogEntry> captor =
                 ArgumentCaptor.forClass(LogEntry.class);
-
         verify(logRepository).save(captor.capture());
-
         LogEntry savedLog = captor.getValue();
-        // Assert
         assertEquals(
                 LogType.SUCCESS,
                 savedLog.getStatus()
         );
     }
-
     @Test
     void log_shouldThrowException_whenActionIsNull() {
-        // Act and assert
         IllegalArgumentException exception =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -109,7 +125,6 @@ class LoggerServiceTest {
     }
     @Test
     void log_shouldThrowException_whenActionIsBlank() {
-
         assertThrows(
                 IllegalArgumentException.class,
                 () -> loggerService.log(
@@ -122,7 +137,6 @@ class LoggerServiceTest {
     }
     @Test
     void log_shouldThrowException_whenMessageIsNull() {
-
         IllegalArgumentException exception =
                 assertThrows(
                         IllegalArgumentException.class,

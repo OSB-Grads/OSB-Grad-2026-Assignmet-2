@@ -1,5 +1,6 @@
 package com.bank.server.dto.response;
 
+import com.bank.server.enums.TransactionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class TransferResponse {
 
     private BigDecimal destinationBalance;
 
-    private String status;
+    private TransactionStatus status;
 
     private LocalDateTime transferredAt;
 
