@@ -63,29 +63,32 @@ public class AuthService {
         customerService.createCustomer(customerDTO);
         return authMapper.toDto(savedAuth);
     }
-    public LoginResponse login(LoginRequestDTO request)  {
-        Authentication authentication =
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                request.getUsername(),
-                                request.getPassword()
-                        )
-                );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        CustomUserDetails userDetails =
-                (CustomUserDetails) authentication.getPrincipal();
-        String token = jwtService.generateToken(userDetails);
-        loggerService.log(
-                "AUTH_LOGIN",
-                "User logged in successfully with username: "
-                        + userDetails.getUsername(),
-                LogType.SUCCESS
-        );
-        return LoginResponse.builder()
-                .token(token)
-                .build();
-    }
+    public LoginResponse login(LoginRequestDTO request) {
+        try {
+            Authentication authentication =
+                    authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    request.getUsername(),
+                                    request.getPassword()
+                            )
+                    );
 
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            CustomUserDetails userDetails =
+                    (CustomUserDetails) authentication.getPrincipal();
+
+            String token = jwtService.generateToken(userDetails);
+
+            return LoginResponse.builder()
+                    .token(token)
+                    .build();
+
+        } catch (Exception e) {
+            e.printStackTrace(); // IMPORTANT
+            throw e;
+        }
+    }
     public UsernameAvailabilityResponse checkUsernameAvailability(String username) {
         boolean available = !authRepository.existsByUsername(username);
         return new UsernameAvailabilityResponse(
