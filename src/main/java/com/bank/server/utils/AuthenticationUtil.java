@@ -19,8 +19,6 @@ public class AuthenticationUtil {
     }
     public static CustomUserDetails getCurrentUser() {
         Object principal = getAuthentication().getPrincipal();
-        System.out.println("Principal class = " + principal.getClass().getName());
-        System.out.println("Principal value = " + principal);
         return (CustomUserDetails) principal;
     }
 

@@ -60,7 +60,5 @@ public class LoggerService {
         logEntry.setStatus(
                 status != null ? status : LogType.SUCCESS
         );
-        System.out.println("LogEntry :-------"  + logEntry);
-
         logEntryRepository.save(logEntry);
     }}

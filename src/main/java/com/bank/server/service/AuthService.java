@@ -54,12 +54,11 @@ public class AuthService {
                 .build();
 
         Auth savedAuth = authRepository.save(auth);
-
-//        loggerService.log(
-//                "AUTH_REGISTER",
-//                "User registered successfully with username: " + savedAuth.getUsername(),
-//                LogType.SUCCESS
-//        );
+        loggerService.log(
+                "AUTH_REGISTER",
+                "User registered successfully with username: " + savedAuth.getUsername(),
+                LogType.SUCCESS
+        );
       customerDTO.setId(auth.getId());
         customerService.createCustomer(customerDTO);
         return authMapper.toDto(savedAuth);
@@ -73,11 +72,9 @@ public class AuthService {
                         )
                 );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        System.out.println("Autherntication:---- " + authentication);
         CustomUserDetails userDetails =
                 (CustomUserDetails) authentication.getPrincipal();
         String token = jwtService.generateToken(userDetails);
-        System.out.println("UserDetails-----------------------------: " + userDetails);
         loggerService.log(
                 "AUTH_LOGIN",
                 "User logged in successfully with username: "
