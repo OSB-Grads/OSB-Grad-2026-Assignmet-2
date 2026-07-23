@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -54,11 +55,11 @@ public class AuthService {
 
         Auth savedAuth = authRepository.save(auth);
 
-        loggerService.log(
-                "AUTH_REGISTER",
-                "User registered successfully with username: " + savedAuth.getUsername(),
-                LogType.SUCCESS
-        );
+//        loggerService.log(
+//                "AUTH_REGISTER",
+//                "User registered successfully with username: " + savedAuth.getUsername(),
+//                LogType.SUCCESS
+//        );
       customerDTO.setId(auth.getId());
         customerService.createCustomer(customerDTO);
         return authMapper.toDto(savedAuth);
@@ -71,10 +72,12 @@ public class AuthService {
                                 request.getPassword()
                         )
                 );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        System.out.println("Autherntication:---- " + authentication);
         CustomUserDetails userDetails =
                 (CustomUserDetails) authentication.getPrincipal();
         String token = jwtService.generateToken(userDetails);
-
+        System.out.println("UserDetails-----------------------------: " + userDetails);
         loggerService.log(
                 "AUTH_LOGIN",
                 "User logged in successfully with username: "
