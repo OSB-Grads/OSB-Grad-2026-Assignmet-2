@@ -34,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-
 @ExtendWith(MockitoExtension.class)
 public class LoanServiceTest {
 
@@ -86,18 +85,14 @@ public class LoanServiceTest {
 
         return request;
     }
-
-
     // creates a fake pending loan used in tests
     private Loan createPendingLoan(Customer customer) {
-
         Loan loan = new Loan();
         loan.setId("loan1");
         loan.setCustomer(customer);
         loan.setLoanCategory(LoanCategory.PERSONAL);
         loan.setRequestedAmount(LOAN_AMOUNT);
         loan.setStatus(LoanStatus.PENDING);
-
         return loan;
     }
 
@@ -105,12 +100,9 @@ public class LoanServiceTest {
     @Nested
     class RequestLoanTests {
 
-
         @Test
         void shouldCreateLoanRequest() {
-
             // Arrange
-
             // Create the loan request
             LoanRequestDTO request = createLoanRequest();
 

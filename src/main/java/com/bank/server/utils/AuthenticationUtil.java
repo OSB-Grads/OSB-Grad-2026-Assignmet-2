@@ -24,10 +24,34 @@ public class AuthenticationUtil {
     }
 
     public static CustomUserDetails getCurrentUser() {
-        return (CustomUserDetails) getAuthentication().getPrincipal();
+        Object principal = getAuthentication().getPrincipal();
+
+        if (principal instanceof CustomUserDetails user) {
+            return user;
+        }
+
+        throw new UnauthorizedException(
+                "AUTH_ERROR",
+                "User is not authenticated"
+        );
     }
 
     public static String getCurrentCustomerId() {
         return getCurrentUser().getCustomerId();
+    }
+    public static String getCurrentCustomerIdOrNull() {
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        Object principal = authentication.getPrincipal();
+
+
+        if (!(principal instanceof CustomUserDetails customUser)) {
+            return null;
+        }
+        return customUser.getCustomerId();
     }
 }

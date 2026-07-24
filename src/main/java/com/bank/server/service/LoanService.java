@@ -49,7 +49,7 @@ public class LoanService {
 
         // Loan category is mandatory for every loan request
         LoanCategory loanCategory = request.getLoanCategory();
-        if (loanCategory == null) {
+        if (loanCategory == null)  {
             throw new LoanRequestException(
                     "LOAN_REQUEST",
                     "Loan category is required");
@@ -135,9 +135,12 @@ public class LoanService {
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public void processPendingLoans() {
+    public String processPendingLoans() {
+
         // Fetch all loan requests waiting for admin approval
-        List<Loan> pendingLoans = loanRepository.findByStatus(LoanStatus.PENDING);
+        List<Loan> pendingLoans =
+                loanRepository.findByStatus(LoanStatus.PENDING);
+
         // If there are no pending requests, stop processing
         if (pendingLoans.isEmpty()) {
             loggerService.log(
@@ -145,21 +148,27 @@ public class LoanService {
                     "No pending loans found",
                     LogType.SUCCESS
             );
-            return;
+
+            return "No pending loans to process";
         }
+
         // Admin processes each pending loan one by one
         for (Loan loan : pendingLoans) {
 
             // Fetch the loan product associated with the selected loan category
             // Retrieve the loan product corresponding to the loan category
-           // PERSONAL -> Personal Loan Product
-            List<Product> products = productRepository.findByLoanCategory(loan.getLoanCategory());
+            // PERSONAL -> Personal Loan Product
+            List<Product> products =
+                    productRepository.findByLoanCategory(
+                            loan.getLoanCategory()
+                    );
 
             // Every loan category should have one configured loan product
             if (products.isEmpty()) {
                 throw new ProductNotFoundException(
                         "PRODUCT_NOT_FOUND",
-                        "No product found for loan category: " + loan.getLoanCategory()
+                        "No product found for loan category: "
+                                + loan.getLoanCategory()
                 );
             }
 
@@ -192,10 +201,11 @@ public class LoanService {
             loggerService.log(
                     "LOAN_APPROVE",
                     "Loan approved successfully. Loan ID: " + loan.getId(),
-                    LogType.SUCCESS);
-
-
-
+                    LogType.SUCCESS
+            );
         }
+
+        // All pending loans have been processed
+        return "All pending loans processed successfully";
     }
 }

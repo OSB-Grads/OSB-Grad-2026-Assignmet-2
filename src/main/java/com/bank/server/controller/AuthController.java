@@ -53,10 +53,14 @@ public class AuthController {
                 .body("User Created Successfully");
     }
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequestDTO request) {
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequestDTO request) {
+
+        System.out.println("====== LOGIN CONTROLLER HIT ======");
+
         LoginResponse response = authService.login(request);
-        return ResponseEntity.ok(response);
-    }
+
+        return ResponseEntity.ok(response);}
     @GetMapping("/me")
     public ResponseEntity<CustomerDTO> getCurrentProfile(Authentication authentication) {
         CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();

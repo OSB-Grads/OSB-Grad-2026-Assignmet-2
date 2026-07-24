@@ -183,12 +183,9 @@ class ProductServiceTest {
                 .thenReturn(Optional.of(product));
 
 
-        when(productMapper.toDTO(product))
-                .thenReturn(dto);
+        when(productMapper.toDTO(product)).thenReturn(dto);
 
-        List<ProductDTO> result =
-                productService.getAllProductsByCategory(
-                        ProductCategory.SAVINGS);
+        List<ProductDTO> result = productService.getAllProductsByCategory(ProductCategory.SAVINGS);
 
         assertEquals(1, result.size());
 
@@ -318,7 +315,6 @@ class ProductServiceTest {
         assertThrows(
                 ProductNotFoundException.class,
                 () -> productService.updateProduct(
-                        "PROD001",
-                        request));
+                        "PROD001", request));
     }
 }
