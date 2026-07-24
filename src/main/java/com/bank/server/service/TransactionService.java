@@ -2,16 +2,13 @@ package com.bank.server.service;
 
 import com.bank.server.dto.TransactionDTO;
 import com.bank.server.dto.response.PaymentResponseDTO;
-import com.bank.server.entity.Account;
-import com.bank.server.entity.Customer;
-import com.bank.server.entity.Inbox;
 import com.bank.server.dto.response.TransferResponse;
 import com.bank.server.entity.Account;
+import com.bank.server.entity.Customer;
 import com.bank.server.entity.Transaction;
 import com.bank.server.enums.TransactionStatus;
 import com.bank.server.exception.AccountNotFoundException;
 import com.bank.server.exception.CustomerNotFoundException;
-import com.bank.server.exception.InboxNotFoundException;
 import com.bank.server.exception.TransactionNotFoundException;
 import com.bank.server.mapper.TransactionMapper;
 import com.bank.server.repository.AccountRepository;
@@ -26,8 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import static com.bank.server.enums.TransactionStatus.COMPLETED;
 
 @Service
 @RequiredArgsConstructor
@@ -50,9 +45,14 @@ public class TransactionService {
     }
 
     public List<TransactionDTO> getTransactionsByAccountNumber(String accountNumber) {
-        Optional<Account> account =accountRepository.findByAccountNumber(accountNumber);
-        String accountId=account.get().getId();
-        List<Transaction> transactions = transactionRepository.findByAccountId(accountId);
+
+        Optional<Account> account =
+                accountRepository.findByAccountNumber(accountNumber);
+
+        String accountId = account.get().getId();
+
+        List<Transaction> transactions =
+                transactionRepository.findByAccountId(accountId);
 
         List<TransactionDTO> dtoList = new ArrayList<>();
 
@@ -65,7 +65,8 @@ public class TransactionService {
 
     public List<TransactionDTO> getTransactionsByCustomerId(String customerId) {
 
-        List<Transaction> transactions = transactionRepository.findByCustomerId(customerId);
+        List<Transaction> transactions =
+                transactionRepository.findByCustomerId(customerId);
 
         List<TransactionDTO> dtoList = new ArrayList<>();
 
@@ -76,87 +77,117 @@ public class TransactionService {
         return dtoList;
     }
 
-    public TransactionDTO createTransaction(TransactionDTO transactionDTO)
-    {
-        Transaction transaction = transactionMapper.toEntity(transactionDTO);
+    public TransactionDTO createTransaction(TransactionDTO transactionDTO) {
+
+        Transaction transaction =
+                transactionMapper.toEntity(transactionDTO);
 
         transaction.setId(Generator.generateUuid());
 
-        Customer customer = customerRepository.findById(transactionDTO.getCustomerId())
-                .orElseThrow(()->new CustomerNotFoundException("CUTSOMER_NOT_FOUND","Customer not found for transaction creation"));
+        Customer customer = customerRepository
+                .findById(transactionDTO.getCustomerId())
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "CUTSOMER_NOT_FOUND",
+                        "Customer not found for transaction creation"
+                ));
 
         transaction.setCustomer(customer);
 
-        if(transactionDTO.getFromAccountId()!=null)
-        {
-            Account account = accountRepository.findById(transactionDTO.getFromAccountId())
-                    .orElseThrow(()->new AccountNotFoundException("ACCOUNT_NOT_FOUND","Account not found for transaction creation"));
+        if (transactionDTO.getFromAccountId() != null) {
+
+            Account account = accountRepository
+                    .findById(transactionDTO.getFromAccountId())
+                    .orElseThrow(() -> new AccountNotFoundException(
+                            "ACCOUNT_NOT_FOUND",
+                            "Account not found for transaction creation"
+                    ));
+
             transaction.setFromAccount(account);
         }
 
-        if(transactionDTO.getToAccountId()!=null)
-        {
-            Account account = accountRepository.findById(transactionDTO.getToAccountId())
-                    .orElseThrow(()->new AccountNotFoundException("ACCOUNT_NOT_FOUND","Account not found for transaction creation"));
+        if (transactionDTO.getToAccountId() != null) {
+
+            Account account = accountRepository
+                    .findById(transactionDTO.getToAccountId())
+                    .orElseThrow(() -> new AccountNotFoundException(
+                            "ACCOUNT_NOT_FOUND",
+                            "Account not found for transaction creation"
+                    ));
+
             transaction.setToAccount(account);
         }
 
-        Transaction savedTransaction = transactionRepository.save(transaction);
+        Transaction savedTransaction =
+                transactionRepository.save(transaction);
 
         return transactionMapper.toDto(savedTransaction);
     }
 
-    public TransactionDTO updateTransaction(String transactionId , TransactionStatus status)
-    {
-        Transaction transaction = transactionRepository.findById(transactionId)
-                .orElseThrow(()->new TransactionNotFoundException("TRANSACTION_NOT_FOUND","Transaction not found for id "+transactionId));
+    public TransactionDTO updateTransaction(
+            String transactionId,
+            TransactionStatus status) {
+
+        Transaction transaction = transactionRepository
+                .findById(transactionId)
+                .orElseThrow(() -> new TransactionNotFoundException(
+                        "TRANSACTION_NOT_FOUND",
+                        "Transaction not found for id " + transactionId
+                ));
 
         transaction.setStatus(status);
 
-        Transaction updatedTransaction = transactionRepository.save(transaction);
+        Transaction updatedTransaction =
+                transactionRepository.save(transaction);
 
         return transactionMapper.toDto(updatedTransaction);
     }
 
     public PaymentResponseDTO getTransactionStatus(String transactionId) {
-        Transaction transaction = transactionRepository.findById(transactionId)
-                .orElseThrow(() -> new TransactionNotFoundException("TRANSACTION_NOT_FOUND", "Transaction not found for id " + transactionId));
 
+        Transaction transaction = transactionRepository
+                .findById(transactionId)
+                .orElseThrow(() -> new TransactionNotFoundException(
+                        "TRANSACTION_NOT_FOUND",
+                        "Transaction not found for id " + transactionId
+                ));
 
         return PaymentResponseDTO.builder()
                 .id(transaction.getId())
                 .status(transaction.getStatus())
-                .message("Payment status fetched successfully.").build();
+                .message("Payment status fetched successfully.")
+                .build();
     }
 
     public Transaction createTransferTransaction(
             Account sourceAccount,
             Account destinationAccount,
-            BigDecimal amount
-    ) {
+            BigDecimal amount) {
+
         String reference = UUID.randomUUID().toString();
 
         Transaction transaction = new Transaction();
-        transaction.setId(reference);
 
+        transaction.setId(reference);
         transaction.setTransactionType("TRANSFER");
         transaction.setAmount(amount);
-        transaction.setStatus(COMPLETED);
+        transaction.setStatus(TransactionStatus.COMPLETED);
 
         transaction.setDescription(
                 "Internal transfer reference: " + reference
         );
+
         transaction.setCustomer(sourceAccount.getCustomer());
         transaction.setFromAccount(sourceAccount);
         transaction.setToAccount(destinationAccount);
 
         return transactionRepository.save(transaction);
     }
+
     public TransferResponse toTransferResponse(
             Transaction transaction,
             Account sourceAccount,
-            Account destinationAccount
-    ) {
+            Account destinationAccount) {
+
         return TransferResponse.builder()
                 .transferReference(transaction.getId())
                 .sourceAccountNumber(

@@ -10,6 +10,7 @@ import com.bank.server.mapper.ProductMapper;
 import com.bank.server.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,14 +45,12 @@ class ProductServiceTest {
         Product product = new Product();
         ProductDTO dto = new ProductDTO();
 
-        when(productRepository.findAll())
-                .thenReturn(List.of(product));
-
-        when(productMapper.toDTO(product))
-                .thenReturn(dto);
+        when(productRepository.findAll()).thenReturn(List.of(product));
+        when(productMapper.toDTO(product)).thenReturn(dto);
 
         List<ProductDTO> result = productService.getAllProducts();
 
+        assertNotNull(result);
         assertEquals(1, result.size());
 
         verify(productRepository).findAll();
@@ -69,12 +68,13 @@ class ProductServiceTest {
         when(productRepository.findAll())
                 .thenReturn(Collections.emptyList());
 
-        assertThrows(
+        ProductNotFoundException exception = assertThrows(
                 ProductNotFoundException.class,
                 () -> productService.getAllProducts());
 
-        verify(loggerService, never())
-                .log(any(), any(), any());
+        assertEquals("No Products found", exception.getMessage());
+
+        verify(loggerService, never()).log(any(), any(), any());
     }
 
     @Test
@@ -85,13 +85,13 @@ class ProductServiceTest {
         Product entity = new Product();
 
         Product saved = new Product();
-        saved.setId("PROD001");
+        saved.setId("generated-id");
+        saved.setProductName("Savings Account");
 
         ProductDTO response = new ProductDTO();
-        response.setId("PROD001");
+        response.setId("generated-id");
 
-        when(productMapper.toEntity(request))
-                .thenReturn(entity);
+        when(productMapper.toEntity(request)).thenReturn(entity);
 
         when(productRepository.save(any(Product.class)))
                 .thenReturn(saved);
@@ -99,12 +99,22 @@ class ProductServiceTest {
         when(productMapper.toDTO(saved))
                 .thenReturn(response);
 
-        ProductDTO result =
-                productService.createProduct(request);
+        ProductDTO result = productService.createProduct(request);
 
-        assertEquals("PROD001", result.getId());
+        assertNotNull(result);
+        assertEquals("generated-id", result.getId());
 
-        verify(productRepository).save(any(Product.class));
+        ArgumentCaptor<Product> captor =
+                ArgumentCaptor.forClass(Product.class);
+
+        verify(productRepository).save(captor.capture());
+
+        Product captured = captor.getValue();
+
+        assertNotNull(captured.getId());
+        assertNotNull(captured.getProductName());
+
+        verify(productMapper).toDTO(saved);
 
         verify(loggerService).log(
                 eq("CREATE_PRODUCT"),
@@ -130,9 +140,11 @@ class ProductServiceTest {
         ProductDTO result =
                 productService.getProductById("PROD001");
 
+        assertNotNull(result);
         assertEquals("PROD001", result.getId());
 
         verify(productRepository).findById("PROD001");
+        verify(productMapper).toDTO(product);
 
         verify(loggerService).log(
                 eq("GET_PRODUCT_BY_ID"),
@@ -151,20 +163,24 @@ class ProductServiceTest {
                         ProductNotFoundException.class,
                         () -> productService.getProductById("PROD001"));
 
-        assertNotNull(exception.getMessage());
+        assertEquals(
+                "Product not found with this id : PROD001",
+                exception.getMessage());
+
+        verify(loggerService, never()).log(any(), any(), any());
     }
 
     @Test
     void shouldReturnProductCategories() {
 
-        List<ProductCategory> categories =
+        List<ProductCategory> result =
                 productService.getProductCategories();
 
-        assertNotNull(categories);
+        assertNotNull(result);
 
         assertEquals(
                 ProductCategory.values().length,
-                categories.size());
+                result.size());
 
         verify(loggerService).log(
                 eq("GET_PRODUCT_CATEGORIES"),
@@ -178,19 +194,23 @@ class ProductServiceTest {
         Product product = new Product();
         ProductDTO dto = new ProductDTO();
 
-
         when(productRepository.findByCategory(ProductCategory.SAVINGS))
-                .thenReturn(Optional.of(product));
+                .thenReturn(List.of(product));
 
+        when(productMapper.toDTO(product))
+                .thenReturn(dto);
 
-        when(productMapper.toDTO(product)).thenReturn(dto);
+        List<ProductDTO> result =
+                productService.getAllProductsByCategory(
+                        ProductCategory.SAVINGS);
 
-        List<ProductDTO> result = productService.getAllProductsByCategory(ProductCategory.SAVINGS);
-
+        assertNotNull(result);
         assertEquals(1, result.size());
 
         verify(productRepository)
                 .findByCategory(ProductCategory.SAVINGS);
+
+        verify(productMapper).toDTO(product);
 
         verify(loggerService).log(
                 eq("GET_PRODUCTS_BY_CATEGORY"),
@@ -202,12 +222,19 @@ class ProductServiceTest {
     void shouldThrowExceptionWhenCategoryHasNoProducts() {
 
         when(productRepository.findByCategory(ProductCategory.SAVINGS))
-                .thenReturn(Optional.empty());
+                .thenReturn(Collections.emptyList());
 
-        assertThrows(
-                ProductNotFoundException.class,
-                () -> productService.getAllProductsByCategory(
-                        ProductCategory.SAVINGS));
+        ProductNotFoundException exception =
+                assertThrows(
+                        ProductNotFoundException.class,
+                        () -> productService.getAllProductsByCategory(
+                                ProductCategory.SAVINGS));
+
+        assertEquals(
+                "No Products found for this category SAVINGS",
+                exception.getMessage());
+
+        verify(loggerService, never()).log(any(), any(), any());
     }
 
     @Test
@@ -245,8 +272,7 @@ class ProductServiceTest {
 
         assertEquals(
                 0,
-                new BigDecimal("5")
-                        .compareTo(product.getInterestRate()));
+                new BigDecimal("5").compareTo(product.getInterestRate()));
 
         assertEquals(
                 new BigDecimal("2000"),
@@ -258,6 +284,7 @@ class ProductServiceTest {
 
         verify(productRepository).findById("PROD001");
         verify(productRepository).save(product);
+        verify(productMapper).toDTO(product);
 
         verify(loggerService).log(
                 eq("UPDATE_PRODUCT"),
@@ -287,12 +314,14 @@ class ProductServiceTest {
         when(productMapper.toDTO(product))
                 .thenReturn(new ProductDTO());
 
-        productService.updateProduct("PROD001", request);
+        ProductDTO result =
+                productService.updateProduct("PROD001", request);
+
+        assertNotNull(result);
 
         assertEquals(
                 0,
-                new BigDecimal("5")
-                        .compareTo(product.getInterestRate()));
+                new BigDecimal("5").compareTo(product.getInterestRate()));
 
         assertEquals(
                 new BigDecimal("1000"),
@@ -301,6 +330,11 @@ class ProductServiceTest {
         assertEquals(
                 12L,
                 product.getTermMonths());
+
+        verify(loggerService).log(
+                eq("UPDATE_PRODUCT"),
+                anyString(),
+                eq(LogType.SUCCESS));
     }
 
     @Test
@@ -312,9 +346,17 @@ class ProductServiceTest {
         when(productRepository.findById("PROD001"))
                 .thenReturn(Optional.empty());
 
-        assertThrows(
-                ProductNotFoundException.class,
-                () -> productService.updateProduct(
-                        "PROD001", request));
+        ProductNotFoundException exception =
+                assertThrows(
+                        ProductNotFoundException.class,
+                        () -> productService.updateProduct(
+                                "PROD001",
+                                request));
+
+        assertEquals(
+                "Product not found with this id : PROD001",
+                exception.getMessage());
+
+        verify(loggerService, never()).log(any(), any(), any());
     }
 }

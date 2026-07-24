@@ -9,8 +9,6 @@ import com.bank.server.repository.LogRepository;
 import com.bank.server.utils.AuthenticationUtil;
 import com.bank.server.utils.Generator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,18 +42,12 @@ public class LoggerService {
 
         // Customer may not exist for public endpoints
         // such as login and registration
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        String customerId =
+                AuthenticationUtil.getCurrentCustomerIdOrNull();
 
         Customer customer = null;
 
-        if (authentication != null
-                && authentication.isAuthenticated()
-                && !"anonymousUser".equals(authentication.getPrincipal())) {
-
-            String customerId =
-                    AuthenticationUtil.getCurrentCustomerIdOrNull();
-
+        if (customerId != null) {
             customer = customerRepository
                     .findById(customerId)
                     .orElse(null);
