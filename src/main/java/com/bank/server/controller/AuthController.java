@@ -55,9 +55,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginRequestDTO request) {
-
-        System.out.println("====== LOGIN CONTROLLER HIT ======");
-
         LoginResponse response = authService.login(request);
 
         return ResponseEntity.ok(response);}

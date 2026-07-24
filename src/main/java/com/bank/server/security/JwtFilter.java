@@ -29,24 +29,15 @@ public class JwtFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // DEBUG
-        System.out.println(
-                "JWT FILTER: " +
-                        request.getMethod() + " " +
-                        request.getRequestURI()
-        );
+
 
         String authHeader = request.getHeader("Authorization");
 
-        // DEBUG
-        System.out.println("AUTH HEADER = " + authHeader);
+
 
         // No JWT? Continue normally.
         // This is expected for /login and /register.
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-
-            System.out.println("NO BEARER TOKEN -> continuing filter chain");
-
             filterChain.doFilter(request, response);
             return;
         }
@@ -55,19 +46,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
             String jwt = authHeader.substring(7);
 
-            System.out.println("BEARER TOKEN FOUND");
-
             String customerId = jwtService.extractCustomerId(jwt);
-
-            System.out.println("CUSTOMER ID FROM JWT = " + customerId);
 
             UserDetails userDetails =
                     customUserDetailsService.loadUserByCustomerId(customerId);
-
-            System.out.println(
-                    "USER DETAILS LOADED = " +
-                            userDetails.getUsername()
-            );
 
             if (jwtService.isTokenValid(jwt, userDetails)
                     && SecurityContextHolder
@@ -85,7 +67,6 @@ public class JwtFilter extends OncePerRequestFilter {
                         .getContext()
                         .setAuthentication(authentication);
 
-                System.out.println("AUTHENTICATION SET SUCCESSFULLY");
             }
 
         } catch (JwtException | IllegalArgumentException e) {
