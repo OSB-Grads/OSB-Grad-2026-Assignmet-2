@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import com.bank.server.enums.LoanCategory;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -68,13 +69,41 @@ public class ProductSeeder implements CommandLineRunner {
             limitedAccessPremium.setInterestRate(new BigDecimal("6.00"));
             limitedAccessPremium.setMinOperatingBalance(new BigDecimal("7000.00"));
 
+            Product personalLoan = new Product();
+            personalLoan.setId(UUID.randomUUID().toString());
+            personalLoan.setProductName("Personal Loan");
+            personalLoan.setCategory(ProductCategory.LOAN_ACCOUNT);
+            personalLoan.setLoanCategory(LoanCategory.PERSONAL);
+            personalLoan.setInterestRate(new BigDecimal("12.50"));
+
+            Product homeLoan = new Product();
+            homeLoan.setId(UUID.randomUUID().toString());
+            homeLoan.setProductName("Home Loan");
+            homeLoan.setCategory(ProductCategory.LOAN_ACCOUNT);
+            homeLoan.setLoanCategory(LoanCategory.HOME);
+            homeLoan.setInterestRate(new BigDecimal("8.50"));
+            homeLoan.setMinOperatingBalance(BigDecimal.ZERO);
+
+
+            Product educationLoan = new Product();
+            educationLoan.setId(UUID.randomUUID().toString());
+            educationLoan.setProductName("Education Loan");
+            educationLoan.setCategory(ProductCategory.LOAN_ACCOUNT);
+            educationLoan.setLoanCategory(LoanCategory.EDUCATION);
+            educationLoan.setInterestRate(new BigDecimal("9.00"));
+            personalLoan.setMinOperatingBalance(BigDecimal.ZERO);
+            educationLoan.setMinOperatingBalance(BigDecimal.ZERO);
+
             productRepository.saveAll(List.of(
                     savingsBasic,
                     savingsPremium,
                     fixedDeposit12,
                     fixedDeposit24,
                     limitedAccessBasic,
-                    limitedAccessPremium
+                    limitedAccessPremium,
+                    personalLoan,
+                    homeLoan,
+                    educationLoan
             ));
         }
     }

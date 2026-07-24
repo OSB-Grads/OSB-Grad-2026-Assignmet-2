@@ -49,11 +49,18 @@ public class AuthSeeder implements CommandLineRunner {
             akash.setPasswordHash(passwordEncoder.encode("Akash@123"));
             akash.setRole(Role.CUSTOMER);
 
+            Auth rahul = new Auth();
+            rahul.setId(UUID.randomUUID().toString());
+            rahul.setUsername("rahul");
+            rahul.setPasswordHash(passwordEncoder.encode("Rahul@123"));
+            rahul.setRole(Role.CUSTOMER);
+
             authRepository.saveAll(List.of(
                     admin,
                     shivakumar,
                     charu,
-                    akash
+                    akash,
+                    rahul
             ));
         }
     }

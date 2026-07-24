@@ -4,6 +4,7 @@ import com.bank.server.dto.AccountDTO;
 import com.bank.server.dto.ViewAccountResponseDTO;
 import com.bank.server.entity.Account;
 import com.bank.server.entity.Product;
+import com.bank.server.entity.Customer;
 import com.bank.server.enums.LogType;
 import com.bank.server.exception.AccountNotFoundException;
 import com.bank.server.exception.InsufficientBalanceException;
@@ -92,11 +93,16 @@ class AccountServiceTest {
                 .log(any(), any(), any());
     }
 
+
     @Test
     void shouldReturnSingleAccount() {
 
+        Customer customer = new Customer();
+        customer.setId("CUST001");
+
         Account account = new Account();
         account.setAccountNumber("ACC001");
+        account.setCustomer(customer);
 
         ViewAccountResponseDTO dto = new ViewAccountResponseDTO();
         dto.setAccountNumber("ACC001");
@@ -107,18 +113,22 @@ class AccountServiceTest {
         when(accountMapper.toViewDto(account))
                 .thenReturn(dto);
 
-        ViewAccountResponseDTO result = accountService.getAccountForAccountNumber(
-                "CUST001",
-                "ACC001");
+        ViewAccountResponseDTO result =
+                accountService.getAccountForAccountNumber(
+                        "CUST001",
+                        "ACC001"
+                );
 
         assertEquals("ACC001", result.getAccountNumber());
 
         verify(accountMapper).toViewDto(account);
 
         verify(loggerService)
-                .log(eq("FETCH_ACCOUNT"),
+                .log(
+                        eq("FETCH_ACCOUNT"),
                         anyString(),
-                        eq(LogType.SUCCESS));
+                        eq(LogType.SUCCESS)
+                );
     }
 
     @Test

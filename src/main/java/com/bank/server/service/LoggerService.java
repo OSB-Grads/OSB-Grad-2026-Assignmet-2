@@ -3,30 +3,22 @@ package com.bank.server.service;
 import com.bank.server.entity.Customer;
 import com.bank.server.entity.LogEntry;
 import com.bank.server.enums.LogType;
-import com.bank.server.exception.CustomerNotFoundException;
+import com.bank.server.exception.IllegalArgumentException;
 import com.bank.server.repository.CustomerRepository;
 import com.bank.server.repository.LogRepository;
+import com.bank.server.utils.AuthenticationUtil;
 import com.bank.server.utils.Generator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.bank.server.exception.IllegalArgumentException;
-
-import java.util.Optional;
-import java.util.UUID;
-import com.bank.server.utils.AuthenticationUtil;
-
 
 @RequiredArgsConstructor
 @Service
 public class LoggerService {
 
-    private final LogRepository logEntryRepository;
     private final CustomerRepository customerRepository;
-    Authentication authentication;
+    private final LogRepository logEntryRepository;
+
     @Transactional
     public void log(String action,
                     String message,
@@ -45,8 +37,10 @@ public class LoggerService {
         }
 
         LogEntry logEntry = new LogEntry();
+
         logEntry.setId(Generator.generateUuid());
-        String customerId = AuthenticationUtil.getCurrentCustomerIdOrNull();
+         
+      String customerId = AuthenticationUtil.getCurrentCustomerIdOrNull();
         if(customerId != null) {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new CustomerNotFoundException("CUSTOMER_FETCH",
@@ -61,5 +55,7 @@ public class LoggerService {
         logEntry.setStatus(
                 status != null ? status : LogType.SUCCESS
         );
+
         logEntryRepository.save(logEntry);
-    }}
+    }
+}

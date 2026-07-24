@@ -10,7 +10,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.UUID;
 
 @Component
 @Order(3)
@@ -22,17 +21,22 @@ public class CustomerSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+
         Auth shivakumarAuth = authRepository.findByUsername("shivakumar")
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("User not found: shivakumar"));
 
         Auth charuAuth = authRepository.findByUsername("charu")
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("User not found: charu"));
 
         Auth akashAuth = authRepository.findByUsername("akash")
-                .orElseThrow();
-        Auth adminAuth = authRepository.findByUsername("admin")
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("User not found: akash"));
 
+        Auth rahulAuth = authRepository.findByUsername("rahul")
+                .orElseThrow(() -> new RuntimeException("User not found: rahul"));
+                
+        Auth adminAuth = authRepository.findByUsername("admin")
+                 .orElseThrow(() -> new RuntimeException("User not found: Admin"));
+      
         if (customerRepository.count() == 0) {
 
             Customer shivakumar = new Customer();
@@ -65,6 +69,17 @@ public class CustomerSeeder implements CommandLineRunner {
             akash.setAddress("Bengaluru");
             akash.setNationalId("NI10003");
 
+            Customer rahul = new Customer();
+            rahul.setId(rahulAuth.getId());
+            rahul.setFirstName("Rahul");
+            rahul.setLastName("Pokala");
+            rahul.setDateOfBirth("2002-12-13");
+            rahul.setEmail("rahul@example.com");
+            rahul.setPhone("9876543213");
+            rahul.setAddress("Bengaluru");
+            rahul.setNationalId("NI10004");
+          
+          
             Customer admin = new Customer();
             admin.setId(adminAuth.getId());
             admin.setFirstName("admin");
@@ -79,7 +94,8 @@ public class CustomerSeeder implements CommandLineRunner {
                     admin,
                     shivakumar,
                     charu,
-                    akash
+                    akash,
+                    rahul
             ));
         }
     }
