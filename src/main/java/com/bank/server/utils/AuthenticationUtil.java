@@ -9,7 +9,6 @@ public class AuthenticationUtil {
         Authentication authentication = SecurityContextHolder
                 .getContext()
                 .getAuthentication();
-        System.out.println("-------------------" + authentication + "----------------");
         if (authentication == null
                 || !authentication.isAuthenticated()
                 || !(authentication.getPrincipal() instanceof CustomUserDetails)) {

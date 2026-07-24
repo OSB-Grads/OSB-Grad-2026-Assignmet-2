@@ -74,18 +74,20 @@ public class AuthService {
                     );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            CustomUserDetails userDetails =
-                    (CustomUserDetails) authentication.getPrincipal();
-
-            String token = jwtService.generateToken(userDetails);
-
-            return LoginResponse.builder()
-                    .token(token)
-                    .build();
-
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+        String token = jwtService.generateToken(userDetails);
+        loggerService.log(
+                "AUTH_LOGIN",
+                "User logged in successfully with username: "
+                        + userDetails.getUsername(),
+                LogType.SUCCESS
+        );
+        return LoginResponse.builder()
+                .token(token)
+                .build();
         } catch (Exception e) {
-            e.printStackTrace(); // IMPORTANT
+            e.printStackTrace(); 
             throw e;
         }
     }

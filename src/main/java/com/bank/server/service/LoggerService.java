@@ -26,6 +26,7 @@ public class LoggerService {
 
     private final LogRepository logEntryRepository;
     private final CustomerRepository customerRepository;
+    Authentication authentication;
     @Transactional
     public void log(String action,
                     String message,
