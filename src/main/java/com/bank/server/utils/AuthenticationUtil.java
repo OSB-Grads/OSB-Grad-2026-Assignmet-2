@@ -12,8 +12,10 @@ public class AuthenticationUtil {
         Authentication authentication = SecurityContextHolder
                 .getContext()
                 .getAuthentication();
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
 
-        if (authentication == null || !authentication.isAuthenticated()) {
             throw new UnauthorizedException(
                     "AUTH_ERROR",
                     "User is not authenticated"
@@ -25,18 +27,11 @@ public class AuthenticationUtil {
 
     public static CustomUserDetails getCurrentUser() {
         Object principal = getAuthentication().getPrincipal();
+        return (CustomUserDetails) principal;
 
-        if (principal instanceof CustomUserDetails user) {
-            return user;
-        }
-
-        throw new UnauthorizedException(
-                "AUTH_ERROR",
-                "User is not authenticated"
-        );
     }
-
     public static String getCurrentCustomerId() {
+        System.out.println(getCurrentUser().getCustomerId());
         return getCurrentUser().getCustomerId();
     }
     public static String getCurrentCustomerIdOrNull() {
@@ -47,7 +42,6 @@ public class AuthenticationUtil {
             return null;
         }
         Object principal = authentication.getPrincipal();
-
 
         if (!(principal instanceof CustomUserDetails customUser)) {
             return null;

@@ -72,21 +72,17 @@ public class AuthService {
 
         return authMapper.toDto(savedAuth);
     }
-
     public LoginResponse login(LoginRequestDTO request) {
+        try {
+            Authentication authentication =
+                    authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    request.getUsername(),
+                                    request.getPassword()
+                            )
+                    );
 
-        Authentication authentication =
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                request.getUsername(),
-                                request.getPassword()
-                        )
-                );
-
-        SecurityContextHolder
-                .getContext()
-                .setAuthentication(authentication);
-
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         CustomUserDetails userDetails =
                 (CustomUserDetails) authentication.getPrincipal();
 
@@ -102,14 +98,13 @@ public class AuthService {
         return LoginResponse.builder()
                 .token(token)
                 .build();
+        } catch (Exception e) {
+            e.printStackTrace(); 
+            throw e;
+        }
     }
-
-    public UsernameAvailabilityResponse checkUsernameAvailability(
-            String username) {
-
-        boolean available =
-                !authRepository.existsByUsername(username);
-
+    public UsernameAvailabilityResponse checkUsernameAvailability(String username) {
+        boolean available = !authRepository.existsByUsername(username);
         return new UsernameAvailabilityResponse(
                 available,
                 available

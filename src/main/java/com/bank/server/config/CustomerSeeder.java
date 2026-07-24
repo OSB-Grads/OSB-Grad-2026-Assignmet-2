@@ -33,7 +33,10 @@ public class CustomerSeeder implements CommandLineRunner {
 
         Auth rahulAuth = authRepository.findByUsername("rahul")
                 .orElseThrow(() -> new RuntimeException("User not found: rahul"));
-
+                
+        Auth adminAuth = authRepository.findByUsername("admin")
+                 .orElseThrow(() -> new RuntimeException("User not found: Admin"));
+      
         if (customerRepository.count() == 0) {
 
             Customer shivakumar = new Customer();
@@ -75,8 +78,20 @@ public class CustomerSeeder implements CommandLineRunner {
             rahul.setPhone("9876543213");
             rahul.setAddress("Bengaluru");
             rahul.setNationalId("NI10004");
+          
+          
+            Customer admin = new Customer();
+            admin.setId(adminAuth.getId());
+            admin.setFirstName("admin");
+            admin.setLastName("admin");
+            admin.setDateOfBirth("1998-12-10");
+            admin.setEmail("admin@example.com");
+            admin.setPhone("9876543212");
+            admin.setAddress("Bengaluru");
+            admin.setNationalId("NI10003");
 
             customerRepository.saveAll(List.of(
+                    admin,
                     shivakumar,
                     charu,
                     akash,

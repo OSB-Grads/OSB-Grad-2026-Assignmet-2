@@ -39,21 +39,17 @@ public class LoggerService {
         LogEntry logEntry = new LogEntry();
 
         logEntry.setId(Generator.generateUuid());
-
-        // Customer may not exist for public endpoints
-        // such as login and registration
-        String customerId =
-                AuthenticationUtil.getCurrentCustomerIdOrNull();
-
-        Customer customer = null;
-
-        if (customerId != null) {
-            customer = customerRepository
-                    .findById(customerId)
-                    .orElse(null);
+         
+      String customerId = AuthenticationUtil.getCurrentCustomerIdOrNull();
+        if(customerId != null) {
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new CustomerNotFoundException("CUSTOMER_FETCH",
+                            "Customer not found"));
+            logEntry.setCustomer(customer);
+        }else {
+            logEntry.setCustomer(null);
         }
 
-        logEntry.setCustomer(customer);
         logEntry.setAction(action);
         logEntry.setDetails(message);
         logEntry.setStatus(
