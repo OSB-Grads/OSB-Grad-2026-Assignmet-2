@@ -16,7 +16,7 @@ import org.springframework.security.core.Authentication;
 @RequiredArgsConstructor
 public class CustomerController {
     private final CustomerService customerService;
-//    @PostMapping
+    @PostMapping
 //    public ResponseEntity<CustomerDTO> createCustomer(
 //            @Valid @RequestBody CustomerDTO dto) {
 //

@@ -46,15 +46,16 @@ public class LoggerService {
 
         LogEntry logEntry = new LogEntry();
         logEntry.setId(Generator.generateUuid());
-        String customerId = AuthenticationUtil.getCurrentCustomerId();
+        String customerId = AuthenticationUtil.getCurrentCustomerIdOrNull();
         if(customerId != null) {
-            Customer customer = customerRepository.findById(AuthenticationUtil.getCurrentCustomerId())
+            Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new CustomerNotFoundException("CUSTOMER_FETCH",
                             "Customer not found"));
             logEntry.setCustomer(customer);
         }else {
             logEntry.setCustomer(null);
         }
+
         logEntry.setAction(action);
         logEntry.setDetails(message);
         logEntry.setStatus(

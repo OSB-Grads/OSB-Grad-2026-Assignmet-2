@@ -21,7 +21,7 @@ public class ProductDTO {
     private String id;
     private String productName;
 
-    @NotBlank(message = "Category is required")
+    @NotNull(message = "Category is required")
     private ProductCategory category;
 
     @NotNull(message = "Interest Rate should not be blank")
