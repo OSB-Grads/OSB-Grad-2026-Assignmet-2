@@ -3,6 +3,7 @@ package com.bank.server.service;
 import com.bank.server.entity.Customer;
 import com.bank.server.entity.LogEntry;
 import com.bank.server.enums.LogType;
+import com.bank.server.exception.CustomerNotFoundException;
 import com.bank.server.exception.IllegalArgumentException;
 import com.bank.server.repository.CustomerRepository;
 import com.bank.server.repository.LogRepository;
