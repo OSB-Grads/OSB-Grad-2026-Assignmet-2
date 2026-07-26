@@ -30,7 +30,7 @@ public class TransactionController {
             @PathVariable String accountId) {
 
         return ResponseEntity.ok(
-                transactionService.getTransactionsByAccountNumber(accountId));
+                transactionService.getTransactionsByAccountId(accountId));
     }
 
     @GetMapping("/status/{transactionId}")

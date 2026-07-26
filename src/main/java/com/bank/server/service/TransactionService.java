@@ -63,6 +63,26 @@ public class TransactionService {
         return dtoList;
     }
 
+    public List<TransactionDTO> getTransactionsByAccountId(String accountId) {
+
+        accountRepository.findById(accountId)
+                .orElseThrow(() ->
+                        new AccountNotFoundException(
+                                "ACCOUNT_NOT_FOUND",
+                                "Account not found"));
+
+        List<Transaction> transactions =
+                transactionRepository.findByAccountId(accountId);
+
+        List<TransactionDTO> dtoList = new ArrayList<>();
+
+        for (Transaction transaction : transactions) {
+            dtoList.add(transactionMapper.toDto(transaction));
+        }
+
+        return dtoList;
+    }
+
     public List<TransactionDTO> getTransactionsByCustomerId(String customerId) {
 
         List<Transaction> transactions =
